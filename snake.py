@@ -16,8 +16,16 @@ BLACK = (0, 0, 0)
 CYAN = (0, 255, 255)
 
 # === Shape Configuration Parameters ===
-BLOCKS_COLOR = CYAN
-SNAKE_COLOR = RED
+BLOCKS_COLOR = YELLOW_MUSTARD = (220, 220, 60)  # Yellow for blocks
+SNAKE_COLOR = GREEN_DARK = (100, 255, 100)  # Darker green for snake
+# Head is 20% darker than the snake color
+SNAKE_HEAD_COLOR = (max(0, int(SNAKE_COLOR[0] * 0.8)),
+                    max(0, int(SNAKE_COLOR[1] * 0.8)),
+                    max(0, int(SNAKE_COLOR[2] * 0.8)))
+# Tail is 20% lighter than the snake color
+SNAKE_TAIL_COLOR = (min(255, int(SNAKE_COLOR[0] * 1.5)),
+                    min(255, int(SNAKE_COLOR[1] * 1.5)),
+                    min(255, int(SNAKE_COLOR[2] * 1.5)))
 
 # === Directions ===
 UP = (0, -1)
@@ -93,6 +101,33 @@ def draw_score_label(screen, score):
     text_rect = text.get_rect(topright=(WIDTH - 10, 10))
     screen.blit(text, text_rect)
 
+def is_opposite_direction(current, new):
+    """Check if new direction is opposite to current direction"""
+    return (current[0] == -new[0] and current[1] == -new[1])
+
+class DirectionManager:
+    def __init__(self, initial_direction):
+        self.current_direction = initial_direction
+        self.direction_queue = []
+
+    def queue_direction(self, new_direction):
+        """Try to queue a new direction, ensuring no 180-degree turns"""
+        # If queue is empty, check against current direction
+        if not self.direction_queue:
+            check_against = self.current_direction
+        else:
+            # Check against the last queued direction
+            check_against = self.direction_queue[-1]
+
+        if not is_opposite_direction(check_against, new_direction):
+            self.direction_queue.append(new_direction)
+
+    def get_next_direction(self):
+        """Get the next valid direction from the queue"""
+        if self.direction_queue:
+            self.current_direction = self.direction_queue.pop(0)
+        return self.current_direction
+
 def main():
     global game_over
     while True:
@@ -115,24 +150,36 @@ def main():
             init_block(block)
         running = True
         score = 0  # Initialize score
+
+        # Track the current direction for preventing 180-degree turns
+        direction_manager = DirectionManager(direction)
+
         while running:
             clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                 elif event.type == pygame.KEYDOWN and not game_over:
-                    if event.key == pygame.K_UP and direction != DOWN:
-                        direction = UP
-                    elif event.key == pygame.K_DOWN and direction != UP:
-                        direction = DOWN
-                    elif event.key == pygame.K_LEFT and direction != RIGHT:
-                        direction = LEFT
-                    elif event.key == pygame.K_RIGHT and direction != LEFT:
-                        direction = RIGHT
+                    new_direction = None
+                    if event.key == pygame.K_UP:
+                        new_direction = UP
+                    elif event.key == pygame.K_DOWN:
+                        new_direction = DOWN
+                    elif event.key == pygame.K_LEFT:
+                        new_direction = LEFT
+                    elif event.key == pygame.K_RIGHT:
+                        new_direction = RIGHT
+
+                    # Queue the new direction if valid
+                    if new_direction:
+                        direction_manager.queue_direction(new_direction)
+
             if not game_over:
                 move_counter += 1
                 if move_counter > SNAKE_MOVE_INTERVAL:
                     move_counter = 0
+                    # Get the next direction from the manager
+                    direction = direction_manager.get_next_direction()
                     # Move snake: insert new head, pop tail
                     new_head = (snake[0][0] + direction[0]*STEP, snake[0][1] + direction[1]*STEP)
                     snake.insert(0, new_head)
@@ -183,7 +230,7 @@ def main():
                             block['attached'] = False
                             block['hit'] = False
                             block['ready_to_attach'] = False
-                            block['color'] = (100, 100, 255)  # TAIL color
+                            # No need to set block color here since we're appending to snake and the snake drawing logic handles coloring
                             snake.append(block['pos'])
                             score += 1
                             blocks_to_remove.append(block)
@@ -206,9 +253,9 @@ def main():
                 # Draw snake (all segments, HEAD and TAIL colored differently)
                 for i, pos in enumerate(snake):
                     if i == 0:
-                        draw_block(screen, pos[0], pos[1], (255, 100, 100))  # HEAD
-                    elif i == len(snake) - 1:
-                        draw_block(screen, pos[0], pos[1], (100, 100, 255))  # TAIL
+                        draw_block(screen, pos[0], pos[1], SNAKE_HEAD_COLOR)  # HEAD
+                    elif i == len(snake) - 1 and len(snake) > 1:
+                        draw_block(screen, pos[0], pos[1], SNAKE_TAIL_COLOR)  # TAIL
                     else:
                         draw_block(screen, pos[0], pos[1], SNAKE_COLOR)
             else:
