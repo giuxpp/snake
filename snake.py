@@ -560,11 +560,17 @@ def get_direction_angle(direction):
         return 90
     return 0  # Default to 0 degrees if direction is invalid
 
+def draw_background(display):
+    """Draw the background texture to fill the screen."""
+    for x in range(0, WIDTH, SIDE):
+        for y in range(0, HEIGHT, SIDE):
+            display.blit(DIRT_TEXTURE, (x, y))
+
 # === Main Function ===
 def main():
     # Initialize Pygame and create the display
     pygame.init()
-    display = pygame.display.set_mode((WIDTH, HEIGHT))
+    display = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)  # Make the window non-resizable
     pygame.display.set_caption("Snake Game")
     clock = pygame.time.Clock()
 
@@ -592,6 +598,10 @@ def main():
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
+                    # End game if ESC is pressed during gameplay
+                    if game_started and event.key == pygame.K_ESCAPE:
+                        game_over = True
+                        continue
                     # Start game on first arrow key press
                     if not game_started and event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
                         game_started = True
@@ -603,6 +613,7 @@ def main():
             if not game_started:
                 # Just draw the initial state
                 display.fill((0, 0, 0))  # Clear screen
+                draw_background(display)  # Draw background texture
                 draw_blocks(blocks, display)
                 draw_snake(display, snake)
                 draw_score_label(display, score)
@@ -651,6 +662,7 @@ def main():
 
             # Drawing
             display.fill((0, 0, 0))  # Clear screen
+            draw_background(display)  # Draw the background texture
             draw_blocks(blocks, display)
             draw_snake(display, snake)
             draw_score_label(display, score)
