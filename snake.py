@@ -2,106 +2,30 @@ import pygame
 import random
 import sys
 
-# === General Configuration Parameters ===
+# === Configuration Parameters and Global Variables ===
 WIDTH, HEIGHT = 800, 600
 SIDE = 30
 STEP = SIDE  # All blocks move SIDE on every step
 FPS = 60  # Increased for smoother animation
-MOVEMENT_FRAMES = 8  # Number of frames for smooth movement between grid positions
-SNAKE_MOVE_INTERVAL = MOVEMENT_FRAMES  # Sync with movement frames
+SNAKE_SPEED = 8  # Snake moves per second
+MOVE_DELAY = FPS // SNAKE_SPEED  # Frames between each snake movement
 N_BLOCKS = 4
-
-def lerp(start, end, t):
-    """Linear interpolation between start and end points"""
-    x1, y1 = start
-    x2, y2 = end
-    return (
-        x1 + (x2 - x1) * t,
-        y1 + (y2 - y1) * t
-    )
-
-def get_segment_position(current_pos, target_pos, frame, total_frames):
-    """Get interpolated position for a snake segment"""
-    if frame >= total_frames:
-        return target_pos
-    t = frame / total_frames
-    t = max(0.0, min(1.0, t))  # Clamp between 0 and 1
-    # Use cubic easing for smoother start/stop
-    t = t * t * (3 - 2 * t)
-    return lerp(current_pos, target_pos, t)
-
-def get_tail_direction(prev_pos, tail_pos):
-    """Calculate the direction vector from tail to previous segment"""
-    dx = prev_pos[0] - tail_pos[0]
-    dy = prev_pos[1] - tail_pos[1]
-    # Normalize to unit vector
-    if dx != 0:
-        dx = dx // abs(dx)
-    if dy != 0:
-        dy = dy // abs(dy)
-    return (dx, dy)
-
-# === Colors ===
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 CYAN = (0, 255, 255)
-
-# === Shape Configuration Parameters ===
 BLOCKS_COLOR = YELLOW_MUSTARD = (220, 220, 60)  # Yellow for blocks
 SNAKE_COLOR = GREEN_DARK = (100, 255, 100)  # Darker green for snake
-# Head is 20% darker than the snake color
 SNAKE_HEAD_COLOR = (max(0, int(SNAKE_COLOR[0] * 0.6)),
                     max(0, int(SNAKE_COLOR[1] * 0.6)),
                     max(0, int(SNAKE_COLOR[2] * 0.6)))
-# Tail is 20% lighter than the snake color
 SNAKE_TAIL_COLOR = (min(250, int(SNAKE_COLOR[0] * 1.8)),
                     min(250, int(SNAKE_COLOR[1] * 1.6)),
                     min(250, int(SNAKE_COLOR[2] * 1.4)))
-
-# === Directions ===
 UP = (0, -1)
 DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
-
-game_over = False  # Global variable to track game state
-
-# Generate random positions for blocks
-def generate_blocks(n, forbidden=None):
-    blocks = []
-    cols = WIDTH // SIDE
-    rows = HEIGHT // SIDE
-    if forbidden is None:
-        forbidden = set()
-    # Generate all possible grid positions
-    all_positions = [(x * SIDE, y * SIDE) for x in range(cols) for y in range(rows)]
-    available_positions = [pos for pos in all_positions if pos not in forbidden]
-    random.shuffle(available_positions)
-    for pos in available_positions:
-        if len(blocks) >= n:
-            break
-        blocks.append({'pos': pos, 'color': BLOCKS_COLOR})
-    return blocks
-
-def init_block(block):
-    """Initialize a block with default properties"""
-    block['hit'] = False
-    block['attached'] = False
-    block['path_index'] = None
-    block['ready_to_attach'] = False
-    return block
-
-def generate_single_block(forbidden=None):
-    cols = WIDTH // SIDE
-    rows = HEIGHT // SIDE
-    if forbidden is None:
-        forbidden = set()
-    all_positions = [(x * SIDE, y * SIDE) for x in range(cols) for y in range(rows)]
-    available_positions = [pos for pos in all_positions if pos not in forbidden]
-    if not available_positions:
-        return None
-    pos = random.choice(available_positions)
-    return {'pos': pos, 'color': BLOCKS_COLOR}
+game_over = False
 
 # === Texture Generation ===
 def create_gradient_dot_texture(color, size=SIDE, dot_size=4):
@@ -377,6 +301,44 @@ def is_opposite_direction(current, new):
     """Check if new direction is opposite to current direction"""
     return (current[0] == -new[0] and current[1] == -new[1])
 
+# === Classes ===
+class Block:
+    def __init__(self, pos, color=None):
+        self.pos = pos
+        self._color = color
+        self.hit = False
+        self.attached = False
+        self.path_index = None
+        self.ready_to_attach = False
+        self.texture = None
+
+    @property
+    def color(self):
+        return self._color if self._color is not None else BLOCKS_COLOR
+
+    def update_texture(self):
+        """Update the block's texture based on its color"""
+        if not self.texture:
+            self.texture = create_gradient_dot_texture(self.color)
+
+    def draw(self, display):
+        """Draw the block on the display"""
+        if not self.texture:
+            self.update_texture()
+        draw_block(display, self.pos, self.color, self.texture)
+
+    def handle_collision(self, snake):
+        """Handle collision with snake. Returns score increase."""
+        return 0
+
+class RegularBlock(Block):
+    def __init__(self, pos):
+        super().__init__(pos, BLOCKS_COLOR)
+
+    def handle_collision(self, snake):
+        """Regular blocks add 1 to score and make the snake grow"""
+        return 1
+
 class DirectionManager:
     def __init__(self, initial_direction=RIGHT):
         self.current_direction = initial_direction
@@ -415,17 +377,36 @@ class DirectionManager:
             self.current_direction = self.direction_queue.pop(0)
         return self.current_direction
 
-def get_direction_angle(direction):
-    """Convert a direction vector to an angle in degrees"""
-    if direction == UP:
-        return 0
-    elif direction == RIGHT:
-        return 270
-    elif direction == DOWN:
-        return 180
-    elif direction == LEFT:
-        return 90
-    return 0
+# === Functions ===
+def lerp(start, end, t):
+    """Linear interpolation between start and end points"""
+    x1, y1 = start
+    x2, y2 = end
+    return (
+        x1 + (x2 - x1) * t,
+        y1 + (y2 - y1) * t
+    )
+
+def get_segment_position(current_pos, target_pos, frame, total_frames):
+    """Get interpolated position for a snake segment"""
+    if frame >= total_frames:
+        return target_pos
+    t = frame / total_frames
+    t = max(0.0, min(1.0, t))  # Clamp between 0 and 1
+    # Use cubic easing for smoother start/stop
+    t = t * t * (3 - 2 * t)
+    return lerp(current_pos, target_pos, t)
+
+def get_tail_direction(prev_pos, tail_pos):
+    """Calculate the direction vector from tail to previous segment"""
+    dx = prev_pos[0] - tail_pos[0]
+    dy = prev_pos[1] - tail_pos[1]
+    # Normalize to unit vector
+    if dx != 0:
+        dx = dx // abs(dx)
+    if dy != 0:
+        dy = dy // abs(dy)
+    return (dx, dy)
 
 # Movement interpolation parameters
 def lerp(start, end, t):
@@ -451,10 +432,11 @@ def generate_initial_blocks():
     """Generate initial blocks for the game start"""
     blocks = []
     forbidden = {(WIDTH // 4, HEIGHT // 2)}  # Initial snake position
-    all_blocks = generate_blocks(N_BLOCKS, forbidden)
-    for block in all_blocks:
-        init_block(block)
-        blocks.append(block)
+    for _ in range(N_BLOCKS):
+        pos = generate_block_position(forbidden)
+        if pos:
+            blocks.append(RegularBlock(pos))
+            forbidden.add(pos)
     return blocks
 
 def generate_block_position(forbidden):
@@ -475,186 +457,181 @@ def generate_block_position(forbidden):
 
     return random.choice(all_positions)
 
-def main():
-    print("Starting game initialization...")
-    pygame.init()
-    if not pygame.display.get_init():
-        print("Could not initialize display")
-        return
+def get_random_empty_cell(snake_positions=None, block_positions=None):
+    """Get a random empty cell that's not occupied by snake or blocks"""
+    forbidden = set()
+    if snake_positions:
+        forbidden.update(snake_positions)
+    if block_positions:
+        forbidden.update(block_positions)
+    return generate_block_position(forbidden)
 
-    print("Display initialized successfully")
-    clock = pygame.time.Clock()
+def update_blocks(blocks, snake, score):
+    """Update blocks positions and handle collisions"""
+    snake_head = snake[0]
+    print(f"Snake head at: {snake_head}")
+    print(f"Block positions: {[block.pos for block in blocks]}")
+
+    # Check collisions with snake head
+    for block in blocks[:]:  # Create a copy of the list to safely modify it
+        # Print comparison of positions for debugging
+        if block.pos[0] == snake_head[0]:
+            print(f"X match found at {block.pos[0]}")
+        if block.pos[1] == snake_head[1]:
+            print(f"Y match found at {block.pos[1]}")
+
+        # Check if the snake head overlaps with any block
+        if block.pos[0] == snake_head[0] and block.pos[1] == snake_head[1]:
+            print(f"Collision detected with block at {block.pos}!")
+            if not block.hit:
+                print("Processing collision...")
+                block.hit = True
+                score_increase = block.handle_collision(snake)
+                score += score_increase
+                print(f"Score increased by {score_increase}")
+                blocks.remove(block)
+                print(f"Block removed. Remaining blocks: {len(blocks)}")
+
+                # Keep the tail position for growing
+                old_tail = snake[-1]
+
+                # Grow the snake by adding a new segment at the tail position
+                snake.append(old_tail)
+                print(f"Snake grown. New length: {len(snake)}")
+
+                # Create a new block in a random empty position
+                forbidden = {pos for pos in snake}
+                forbidden.update(b.pos for b in blocks)
+                new_block_pos = generate_block_position(forbidden)
+                if new_block_pos:
+                    blocks.append(RegularBlock(new_block_pos))
+                    print(f"New block added at {new_block_pos}")
+                break
+
+    return score
+
+def draw_blocks(blocks, display):
+    """Draw all blocks on the display"""
+    for block in blocks:
+        block.draw(display)
+
+def draw_snake(display, snake):
+    """Draw the snake with special head and tail textures"""
+    for i, pos in enumerate(snake):
+        if i == 0:  # Head
+            draw_block(display, pos, SNAKE_HEAD_COLOR)
+        elif i == len(snake) - 1:  # Tail
+            draw_block(display, pos, SNAKE_TAIL_COLOR)
+        else:  # Body
+            draw_block(display, pos, SNAKE_COLOR)
+
+def handle_input(key, current_direction):
+    """Handle keyboard input for direction changes"""
+    new_direction = current_direction
+    if key == pygame.K_UP and current_direction != DOWN:
+        new_direction = UP
+    elif key == pygame.K_DOWN and current_direction != UP:
+        new_direction = DOWN
+    elif key == pygame.K_LEFT and current_direction != RIGHT:
+        new_direction = LEFT
+    elif key == pygame.K_RIGHT and current_direction != LEFT:
+        new_direction = RIGHT
+    return new_direction
+
+# === Main Function ===
+def main():
+    # Initialize Pygame and create the display
+    pygame.init()
     display = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Snake Game")
+    clock = pygame.time.Clock()
 
-    try:
-        print("Initializing game components...")
-        init_textures()
-        print("Textures initialized")
+    # Initialize textures once
+    init_textures()
+
+    while True:  # Main game loop for multiple plays
+        # Initialize game state
+        snake = [(WIDTH // 4, HEIGHT // 2)]  # Start with just the head
+        snake_length = len(snake)  # Track snake length for growth
         direction_manager = DirectionManager(RIGHT)
-        print("Direction manager initialized")
+        blocks = generate_initial_blocks()
+        score = 0
+        game_over = False
+        move_counter = 0  # Counter for move delay
+        game_started = False  # Flag to track if the game has started
 
-        while True:  # Main game loop for restarts
-            print("Starting new game...")
-            running = True
-            game_over = False
-            score = 0
+        # Game loop for one play
+        while not game_over:
+            # Event handling
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    # Start game on first arrow key press
+                    if not game_started and event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
+                        game_started = True
+                    direction_manager.handle_key_press(event.key)
 
-            # Initialize snake - ensure grid alignment
-            start_pos = ((WIDTH // 4) // SIDE * SIDE, (HEIGHT // 2) // SIDE * SIDE)  # Align to grid
-            snake = [start_pos]
-            snake_visual = [[start_pos[0], start_pos[1]]]  # Convert tuple to list coordinates
-            snake_targets = [[start_pos[0], start_pos[1]]]  # Convert tuple to list coordinates
-            moving = False
-            movement_frame = 0
-            move_counter = 0
-
-            # Initialize blocks
-            blocks = generate_initial_blocks()
-            print("Game initialized, starting game loop")
-
-            while running:
+            # Don't update snake position until game has started
+            if not game_started:
+                # Just draw the initial state
+                display.fill((0, 0, 0))  # Clear screen
+                draw_blocks(blocks, display)
+                draw_snake(display, snake)
+                draw_score_label(display, score)
+                pygame.display.flip()
                 clock.tick(FPS)
+                continue
 
-                # Handle events
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        running = False
-                    elif event.type == pygame.KEYDOWN and not game_over:
-                        direction_manager.handle_key_press(event.key)
+            # Update game state
+            move_counter += 1
+            if move_counter >= MOVE_DELAY:
+                move_counter = 0
 
-                if game_over:
-                    # Show game over screen and wait for restart
-                    if show_game_over(display, score):
-                        break  # Break inner loop to restart
-                    else:
-                        running = False
+                # Update snake position
+                direction = direction_manager.get_next_direction()
+                # Ensure we're moving in grid-aligned steps
+                new_head = (
+                    (snake[0][0] + direction[0] * STEP) // SIDE * SIDE,
+                    (snake[0][1] + direction[1] * STEP) // SIDE * SIDE
+                )
+                print(f"Moving to new head position: {new_head}")
+
+                # Check wall collision
+                if (new_head[0] < 0 or new_head[0] >= WIDTH or
+                    new_head[1] < 0 or new_head[1] >= HEIGHT):
+                    print("Wall collision detected!")
+                    game_over = True
                     continue
 
-                # Clear screen with background
-                for y in range(0, HEIGHT, SIDE):
-                    for x in range(0, WIDTH, SIDE):
-                        display.blit(DIRT_TEXTURE, (x, y))
+                # Check for collisions with self
+                if new_head in snake[1:]:
+                    game_over = True
+                    continue
 
-                # Movement and game logic
-                if not moving:
-                    move_counter += 1
-                    if move_counter >= SNAKE_MOVE_INTERVAL:
-                        move_counter = 0
-                        movement_frame = 0
-                        moving = True
+                # Move snake
+                snake.insert(0, new_head)
 
-                        # Get next direction and calculate new head position
-                        direction = direction_manager.get_next_direction()
-                        new_head = (
-                            snake[0][0] + direction[0] * STEP,
-                            snake[0][1] + direction[1] * STEP
-                        )
+                # Update blocks and score - this will grow the snake if a block is hit
+                old_score = score
+                score = update_blocks(blocks, snake, score)
 
-                        # Check collisions
-                        if (new_head[0] < 0 or new_head[0] >= WIDTH or
-                            new_head[1] < 0 or new_head[1] >= HEIGHT or
-                            new_head in snake[:-1]):
-                            game_over = True
-                            continue
+                # Only remove tail if we didn't collect a block (score didn't change)
+                if score == old_score:
+                    snake.pop()
 
-                        # Update snake positions
-                        snake.insert(0, new_head)
+            # Drawing
+            display.fill((0, 0, 0))  # Clear screen
+            draw_blocks(blocks, display)
+            draw_snake(display, snake)
+            draw_score_label(display, score)
+            pygame.display.flip()
+            clock.tick(FPS)
 
-                        # Update visual targets
-                        current_head = snake_visual[0] if snake_visual else [start_pos[0], start_pos[1]]
-                        snake_visual.insert(0, [current_head[0], current_head[1]])  # Copy current head position
-                        snake_targets.insert(0, [new_head[0], new_head[1]])  # New target position
-
-                        # Check if we hit a block before removing tail
-                        block_hit = False
-                        for block in blocks:
-                            if block['pos'] == new_head:
-                                block_hit = True
-                                break
-
-                        if not block_hit:  # Only remove tail if we didn't hit a block
-                            snake.pop()
-                            if len(snake_visual) > 1:
-                                snake_visual.pop()
-                                snake_targets.pop()
-
-                        # Handle block collection
-                        for block in blocks[:]:
-                            block_x, block_y = block['pos']
-                            head_x, head_y = new_head
-
-                            # Check if head overlaps with block (use exact position comparison)
-                            if (head_x == block_x and head_y == block_y):
-                                blocks.remove(block)
-                                score += 1
-                                # Don't remove tail when collecting block
-                                if snake.pop() is not None:  # Remove the pop effect
-                                    snake.append(snake[-1])  # Keep the tail
-                                if snake_visual.pop() is not None:
-                                    snake_visual.append(list(snake_visual[-1]))
-                                if snake_targets.pop() is not None:
-                                    snake_targets.append(list(snake_targets[-1]))
-
-                                # Generate new block
-                                forbidden = set(snake)  # Convert snake positions to set
-                                forbidden.update(b['pos'] for b in blocks)
-                                new_block_pos = generate_block_position(forbidden)
-                                if new_block_pos:
-                                    blocks.append({'pos': new_block_pos})
-                                    print(f"New block generated at {new_block_pos}")  # Debug output
-
-                # Update visual positions during movement
-                if moving:
-                    movement_frame += 1
-
-                    # Update all segment positions
-                    for i in range(len(snake_visual)):
-                        current_pos = tuple(snake_visual[i])
-                        target_pos = tuple(snake_targets[i])
-                        snake_visual[i] = list(get_segment_position(
-                            current_pos,
-                            target_pos,
-                            movement_frame,
-                            MOVEMENT_FRAMES
-                        ))
-
-                    if movement_frame >= MOVEMENT_FRAMES:
-                        moving = False
-                        # Align visual positions with targets
-                        for i in range(len(snake_visual)):
-                            snake_visual[i] = list(snake_targets[i])
-
-                # Draw game elements
-                # Draw blocks
-                for block in blocks:
-                    draw_block(display, block['pos'], BLOCKS_COLOR)
-
-                # Draw snake
-                for i, pos in enumerate(snake_visual):
-                    if i == 0:  # Head
-                        angle = get_direction_angle(direction_manager.current_direction)
-                        draw_block(display, pos, SNAKE_HEAD_COLOR, None, angle)
-                    elif i == len(snake_visual) - 1 and len(snake_visual) > 1:  # Tail
-                        tail_dir = get_tail_direction(snake_visual[-2], pos)
-                        angle = get_direction_angle(tail_dir)
-                        draw_block(display, pos, SNAKE_TAIL_COLOR, None, angle)
-                    else:  # Body
-                        draw_block(display, pos, SNAKE_COLOR)
-
-                # Draw score
-                draw_score_label(display, score)
-
-                # Update display
-                pygame.display.flip()
-
-    except Exception as e:
-        print(f"Error: {e}")
-        import traceback
-        traceback.print_exc()
-    finally:
-        pygame.quit()
-        sys.exit()
+        # Game Over screen
+        if not show_game_over(display, score):  # If show_game_over returns False, exit game
+            break
 
 if __name__ == "__main__":
     main()
