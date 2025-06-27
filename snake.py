@@ -201,20 +201,19 @@ def main():
                     hx, hy = snake[0]
                     if hx < 0 or hx + SIDE > WIDTH or hy < 0 or hy + SIDE > HEIGHT:
                         game_over = True
-                    # Check collision with blocks (using area coverage)
-                    head_rect = (hx, hy, SIDE, SIDE)
-                    tail_rect = (snake[-1][0], snake[-1][1], SIDE, SIDE)
+                    # Check collision with blocks (using position matrix)
+                    tail_pos = snake[-1]
+                    head_pos = snake[0]
                     for block in blocks:
-                        block_rect = (block['pos'][0], block['pos'][1], SIDE, SIDE)
                         # HIT: Head covers block
-                        if not block['hit'] and area_coverage(head_rect, block_rect) >= COVERAGE_THRESHOLD:
+                        if not block['hit'] and head_pos == block['pos']:
                             block['color'] = SNAKE_COLOR
                             block['hit'] = True
                         # ATTACH: Tail covers block (after hit)
-                        if block['hit'] and not block['attached'] and area_coverage(tail_rect, block_rect) >= COVERAGE_THRESHOLD:
+                        if block['hit'] and not block['attached'] and tail_pos == block['pos']:
                             block['ready_to_attach'] = True
-                        # Start following path when tail no longer overlaps (0% coverage)
-                        if block.get('ready_to_attach') and not block['attached'] and area_coverage(tail_rect, block_rect) == 0:
+                        # Start following path when tail no longer overlaps
+                        if block.get('ready_to_attach') and not block['attached'] and tail_pos != block['pos']:
                             block['attached'] = True
                             # Find the closest path index to the block's current position
                             min_dist = float('inf')
@@ -236,9 +235,7 @@ def main():
                             else:
                                 block['pos'] = path[0]
                         # Attach to snake if it overlaps with TAIL
-                        block_rect = (block['pos'][0], block['pos'][1], SIDE, SIDE)
-                        overlap = area_coverage(tail_rect, block_rect)
-                        if block['attached'] and overlap >= COVERAGE_THRESHOLD:
+                        if block['attached'] and tail_pos == block['pos']:
                             block['attached'] = False
                             block['hit'] = False
                             block['ready_to_attach'] = False
