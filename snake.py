@@ -191,6 +191,14 @@ def main():
                     hx, hy = snake[0]
                     if hx < 0 or hx + SIDE > WIDTH or hy < 0 or hy + SIDE > HEIGHT:
                         game_over = True
+
+                    # Check for collision with own body (skip the head)
+                    head_pos = snake[0]
+                    for body_pos in snake[1:]:
+                        if head_pos == body_pos:
+                            game_over = True
+                            break
+
                     # Check collision with blocks (using position matrix)
                     tail_pos = snake[-1]
                     head_pos = snake[0]
