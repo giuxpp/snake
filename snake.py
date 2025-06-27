@@ -240,20 +240,52 @@ def create_snake_tail_texture(color, size=SIDE):
 
     return texture
 
+def create_dirt_texture(size=SIDE):
+    """Create a grainy brown dirt texture for the background"""
+    # Base brown color
+    base_color = (139, 69, 19)  # Saddle brown
+    texture = pygame.Surface((size, size), pygame.SRCALPHA)
+
+    # Create variations of brown for the grainy effect
+    darker = (
+        max(0, base_color[0] - 30),
+        max(0, base_color[1] - 30),
+        max(0, base_color[2] - 30)
+    )
+    lighter = (
+        min(255, base_color[0] + 30),
+        min(255, base_color[1] + 30),
+        min(255, base_color[2] + 30)
+    )
+
+    # Fill with base color
+    texture.fill(base_color)
+
+    # Add random noise for grainy effect
+    for y in range(size):
+        for x in range(size):
+            if random.random() < 0.3:  # 30% chance for a grain
+                color = random.choice([darker, lighter])
+                texture.set_at((x, y), color)
+
+    return texture
+
 # Create textures at module level
 BLOCK_TEXTURE = None
 SNAKE_TEXTURE = None
 SNAKE_HEAD_TEXTURE = None
 SNAKE_TAIL_TEXTURE = None
+DIRT_TEXTURE = None  # Background texture
 
 def init_textures():
     """Initialize all textures with gradient-dot pattern and special head texture"""
-    global BLOCK_TEXTURE, SNAKE_TEXTURE, SNAKE_HEAD_TEXTURE, SNAKE_TAIL_TEXTURE
+    global BLOCK_TEXTURE, SNAKE_TEXTURE, SNAKE_HEAD_TEXTURE, SNAKE_TAIL_TEXTURE, DIRT_TEXTURE
 
     BLOCK_TEXTURE = create_gradient_dot_texture(BLOCKS_COLOR)
     SNAKE_TEXTURE = create_gradient_dot_texture(SNAKE_COLOR)
     SNAKE_HEAD_TEXTURE = create_serpent_head_texture(SNAKE_HEAD_COLOR)  # Special head texture
     SNAKE_TAIL_TEXTURE = create_snake_tail_texture(SNAKE_TAIL_COLOR)  # Special tail texture
+    DIRT_TEXTURE = create_dirt_texture()  # Dirt texture for background
 
 def draw_block(screen, x, y, color=SNAKE_COLOR, rotation=0):
     """Draw a textured block with optional rotation"""
@@ -487,8 +519,10 @@ def main():
                     # Remove attached blocks from the list to prevent duplicates
                     for block in blocks_to_remove:
                         blocks.remove(block)
-                # Clear screen
-                display.fill(BLACK)
+                # Fill screen with dirt texture
+                for y in range(0, HEIGHT, SIDE):
+                    for x in range(0, WIDTH, SIDE):
+                        display.blit(DIRT_TEXTURE, (x, y))
                 # Draw blocks
                 for block in blocks:
                     bx, by = block['pos']
