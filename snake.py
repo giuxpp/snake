@@ -368,6 +368,9 @@ class DirectionManager:
             # Check against the last queued direction
             check_against = self.direction_queue[-1]
 
+        if check_against is None:
+            check_against = new_direction  # Default to new direction if no current direction is set
+
         if not is_opposite_direction(check_against, new_direction):
             self.direction_queue.append(new_direction)
 
@@ -521,7 +524,13 @@ def draw_snake(display, snake):
         if i == 0:  # Head
             draw_block(display, pos, SNAKE_HEAD_COLOR)
         elif i == len(snake) - 1:  # Tail
-            draw_block(display, pos, SNAKE_TAIL_COLOR)
+            # Calculate tail direction
+            if len(snake) > 1:
+                tail_direction = get_tail_direction(snake[-2], snake[-1])
+                tail_angle = get_direction_angle(tail_direction)
+                draw_block(display, pos, SNAKE_TAIL_COLOR, rotation=tail_angle)
+            else:
+                draw_block(display, pos, SNAKE_TAIL_COLOR)  # No rotation for single-segment snake
         else:  # Body
             draw_block(display, pos, SNAKE_COLOR)
 
@@ -538,6 +547,19 @@ def handle_input(key, current_direction):
         new_direction = RIGHT
     return new_direction
 
+def get_direction_angle(direction):
+    """Convert a direction vector to an angle in degrees."""
+    dx, dy = direction
+    if dx == 0 and dy == -1:  # UP
+        return 0
+    elif dx == 1 and dy == 0:  # RIGHT
+        return 270
+    elif dx == 0 and dy == 1:  # DOWN
+        return 180
+    elif dx == -1 and dy == 0:  # LEFT
+        return 90
+    return 0  # Default to 0 degrees if direction is invalid
+
 # === Main Function ===
 def main():
     # Initialize Pygame and create the display
@@ -551,9 +573,11 @@ def main():
 
     while True:  # Main game loop for multiple plays
         # Initialize game state
-        snake = [(WIDTH // 4, HEIGHT // 2)]  # Start with just the head
+        center_x = (WIDTH // SIDE // 2) * SIDE
+        center_y = (HEIGHT // SIDE // 2) * SIDE
+        snake = [(center_x, center_y)]  # Start at the center of the screen
         snake_length = len(snake)  # Track snake length for growth
-        direction_manager = DirectionManager(RIGHT)
+        direction_manager = DirectionManager(None)  # Initialize with no direction
         blocks = generate_initial_blocks()
         score = 0
         game_over = False
@@ -571,6 +595,8 @@ def main():
                     # Start game on first arrow key press
                     if not game_started and event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
                         game_started = True
+                        direction_manager.current_direction = None  # Reset initial direction
+                        direction_manager.handle_key_press(event.key)  # Set initial direction based on first key press
                     direction_manager.handle_key_press(event.key)
 
             # Don't update snake position until game has started
@@ -591,6 +617,8 @@ def main():
 
                 # Update snake position
                 direction = direction_manager.get_next_direction()
+                if direction is None:
+                    direction = RIGHT  # Default to RIGHT if no direction is set
                 # Ensure we're moving in grid-aligned steps
                 new_head = (
                     (snake[0][0] + direction[0] * STEP) // SIDE * SIDE,
