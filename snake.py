@@ -443,6 +443,12 @@ def main():
                         if not block['hit'] and head_pos == block['pos']:
                             block['color'] = SNAKE_COLOR
                             block['hit'] = True
+                            # Generate a new block immediately when head hits a block
+                            forbidden = set(seg for seg in snake) | set(b['pos'] for b in blocks)
+                            new_block = generate_single_block(forbidden=forbidden)
+                            if new_block:
+                                init_block(new_block)
+                                blocks.append(new_block)
                         # ATTACH: Tail covers block (after hit)
                         if block['hit'] and not block['attached'] and tail_pos == block['pos']:
                             block['ready_to_attach'] = True
@@ -478,12 +484,6 @@ def main():
                             snake.append(block['pos'])
                             score += 1
                             blocks_to_remove.append(block)
-                            # Generate a new block in a random position (matrix-aligned)
-                            forbidden = set(seg for seg in snake) | set(b['pos'] for b in blocks)
-                            new_block = generate_single_block(forbidden=forbidden)
-                            if new_block:
-                                init_block(new_block)
-                                blocks.append(new_block)
                     # Remove attached blocks from the list to prevent duplicates
                     for block in blocks_to_remove:
                         blocks.remove(block)
