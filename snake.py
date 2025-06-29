@@ -5,6 +5,7 @@ from utils import lerp, get_segment_position, get_tail_direction, get_direction_
 from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture
 from blocks import Block, RegularBlock
 from matrix import generate_block_position, get_random_empty_cell
+from globals import COUNTER, get_tick_counter
 
 # === Configuration Parameters and Global Variables ===
 WIDTH, HEIGHT = 800, 600
@@ -197,10 +198,15 @@ def draw_blocks(blocks, display):
         block.draw(display)
 
 def draw_snake(display, snake):
-    """Draw the snake with special head and tail textures"""
+    """Draw the snake with special head and tail textures, rotating the head."""
     for i, pos in enumerate(snake):
         if i == 0:  # Head
-            draw_block(display, pos, SNAKE_HEAD_COLOR)
+            if len(snake) > 1:
+                head_direction = get_tail_direction(snake[0], snake[1])
+                head_angle = get_direction_angle(head_direction)
+                draw_block(display, pos, SNAKE_HEAD_COLOR, rotation=head_angle)
+            else:
+                draw_block(display, pos, SNAKE_HEAD_COLOR)  # No rotation for single-segment snake
         elif i == len(snake) - 1:  # Tail
             # Calculate tail direction
             if len(snake) > 1:
@@ -220,6 +226,7 @@ def draw_background(display):
 
 # === Main Function ===
 def main():
+    global COUNTER
     # Initialize Pygame and create the display
     pygame.init()
     display = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)  # Make the window non-resizable
@@ -301,6 +308,9 @@ def main():
                 # Move snake
                 snake.insert(0, new_head)
 
+                # Increment the global COUNTER for each move
+                COUNTER += 1
+
                 # Update blocks and score - this will grow the snake if a block is hit
                 old_score = score
                 score = update_blocks(blocks, snake, score)
@@ -308,6 +318,10 @@ def main():
                 # Only remove tail if we didn't collect a block (score didn't change)
                 if score == old_score:
                     snake.pop()
+
+                # Example usage of get_tick_counter
+                if get_tick_counter(5):
+                    print("Event triggered at move count:", COUNTER)
 
             # Drawing
             display.fill((0, 0, 0))  # Clear screen

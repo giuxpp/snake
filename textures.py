@@ -36,7 +36,7 @@ def create_gradient_dot_texture(color, size=30, dot_size=4):
     return texture
 
 def create_serpent_head_texture(color, size=30):
-    """Create a special serpent head texture with scales and eyes"""
+    """Create a special serpent head texture with scales and eyes, suitable for rotation."""
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
     texture.fill(color)  # Base color
 
