@@ -3,6 +3,7 @@ import random
 import sys
 from utils import lerp, get_segment_position, generate_block_position, get_random_empty_cell, get_tail_direction, get_direction_angle
 from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture
+from blocks import Block, RegularBlock
 
 # === Configuration Parameters and Global Variables ===
 WIDTH, HEIGHT = 800, 600
@@ -106,43 +107,6 @@ def is_opposite_direction(current, new):
     return (current[0] == -new[0] and current[1] == -new[1])
 
 # === Classes ===
-class Block:
-    def __init__(self, pos, color=None):
-        self.pos = pos
-        self._color = color
-        self.hit = False
-        self.attached = False
-        self.path_index = None
-        self.ready_to_attach = False
-        self.texture = None
-
-    @property
-    def color(self):
-        return self._color if self._color is not None else BLOCKS_COLOR
-
-    def update_texture(self):
-        """Update the block's texture based on its color"""
-        if not self.texture:
-            self.texture = create_gradient_dot_texture(self.color)
-
-    def draw(self, display):
-        """Draw the block on the display"""
-        if not self.texture:
-            self.update_texture()
-        draw_block(display, self.pos, self.color, self.texture)
-
-    def handle_collision(self, snake):
-        """Handle collision with snake. Returns score increase."""
-        return 0
-
-class RegularBlock(Block):
-    def __init__(self, pos):
-        super().__init__(pos, BLOCKS_COLOR)
-
-    def handle_collision(self, snake):
-        """Regular blocks add 1 to score and make the snake grow"""
-        return 1
-
 class DirectionManager:
     def __init__(self, initial_direction=RIGHT):
         self.current_direction = initial_direction
