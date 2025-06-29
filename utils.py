@@ -1,4 +1,5 @@
 import random
+import pygame  # Import pygame for key constants
 
 # Utility functions
 
@@ -71,3 +72,17 @@ def get_direction_angle(direction):
     elif dx == -1 and dy == 0:  # LEFT
         return 90
     return 0  # Default to 0 degrees if direction is invalid
+
+# Moved `handle_input` function from `snake.py` to `utils.py`.
+def handle_input(key, current_direction):
+    """Handle keyboard input for direction changes."""
+    new_direction = current_direction
+    if key == pygame.K_UP and current_direction != (0, 1):  # DOWN
+        new_direction = (0, -1)  # UP
+    elif key == pygame.K_DOWN and current_direction != (0, -1):  # UP
+        new_direction = (0, 1)  # DOWN
+    elif key == pygame.K_LEFT and current_direction != (1, 0):  # RIGHT
+        new_direction = (-1, 0)  # LEFT
+    elif key == pygame.K_RIGHT and current_direction != (-1, 0):  # LEFT
+        new_direction = (1, 0)  # RIGHT
+    return new_direction

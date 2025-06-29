@@ -1,7 +1,7 @@
 import pygame
 import random
 import sys
-from utils import lerp, get_segment_position, get_tail_direction, get_direction_angle
+from utils import lerp, get_segment_position, get_tail_direction, get_direction_angle, handle_input
 from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture
 from blocks import Block, RegularBlock
 from matrix import generate_block_position, get_random_empty_cell
@@ -211,32 +211,6 @@ def draw_snake(display, snake):
                 draw_block(display, pos, SNAKE_TAIL_COLOR)  # No rotation for single-segment snake
         else:  # Body
             draw_block(display, pos, SNAKE_COLOR)
-
-def handle_input(key, current_direction):
-    """Handle keyboard input for direction changes"""
-    new_direction = current_direction
-    if key == pygame.K_UP and current_direction != DOWN:
-        new_direction = UP
-    elif key == pygame.K_DOWN and current_direction != UP:
-        new_direction = DOWN
-    elif key == pygame.K_LEFT and current_direction != RIGHT:
-        new_direction = LEFT
-    elif key == pygame.K_RIGHT and current_direction != LEFT:
-        new_direction = RIGHT
-    return new_direction
-
-def get_direction_angle(direction):
-    """Convert a direction vector to an angle in degrees."""
-    dx, dy = direction
-    if dx == 0 and dy == -1:  # UP
-        return 0
-    elif dx == 1 and dy == 0:  # RIGHT
-        return 270
-    elif dx == 0 and dy == 1:  # DOWN
-        return 180
-    elif dx == -1 and dy == 0:  # LEFT
-        return 90
-    return 0  # Default to 0 degrees if direction is invalid
 
 def draw_background(display):
     """Draw the background texture to fill the screen."""
