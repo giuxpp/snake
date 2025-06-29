@@ -1,9 +1,10 @@
 import pygame
 import random
 import sys
-from utils import lerp, get_segment_position, generate_block_position, get_random_empty_cell, get_tail_direction, get_direction_angle
+from utils import lerp, get_segment_position, get_tail_direction, get_direction_angle
 from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture
 from blocks import Block, RegularBlock
+from matrix import generate_block_position, get_random_empty_cell
 
 # === Configuration Parameters and Global Variables ===
 WIDTH, HEIGHT = 800, 600
@@ -159,33 +160,6 @@ def generate_initial_blocks():
             blocks.append(RegularBlock(pos))
             forbidden.add(pos)
     return blocks
-
-def generate_block_position(forbidden):
-    """Generate a new random position for a block aligned to the grid"""
-    cols = WIDTH // SIDE
-    rows = HEIGHT // SIDE
-
-    # Create a list of all valid grid positions
-    all_positions = []
-    for x in range(cols):
-        for y in range(rows):
-            pos = (x * SIDE, y * SIDE)
-            if pos not in forbidden:
-                all_positions.append(pos)
-
-    if not all_positions:
-        return None
-
-    return random.choice(all_positions)
-
-def get_random_empty_cell(snake_positions=None, block_positions=None):
-    """Get a random empty cell that's not occupied by snake or blocks"""
-    forbidden = set()
-    if snake_positions:
-        forbidden.update(snake_positions)
-    if block_positions:
-        forbidden.update(block_positions)
-    return generate_block_position(forbidden)
 
 def update_blocks(blocks, snake, score):
     """Update blocks positions and handle collisions"""
