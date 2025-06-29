@@ -88,6 +88,55 @@ def create_serpent_head_texture(color, size=30):
 
     return texture
 
+def create_serpent_head_texture_closed_eyes(color, size=30):
+    """Create a special serpent head texture with scales and closed eyes."""
+    texture = pygame.Surface((size, size), pygame.SRCALPHA)
+    texture.fill(color)  # Base color
+
+    # Create darker shade for details
+    darker = (max(0, int(color[0] * 0.6)),
+             max(0, int(color[1] * 0.6)),
+             max(0, int(color[2] * 0.6)))
+
+    # Draw base gradient
+    for y in range(size):
+        blend = y / size
+        line_color = (
+            int(darker[0] + (color[0] - darker[0]) * blend),
+            int(darker[1] + (color[1] - darker[1]) * blend),
+            int(darker[2] + (color[2] - darker[2]) * blend)
+        )
+        pygame.draw.line(texture, line_color, (0, y), (size, y))
+
+    # Add snake scales pattern (triangular scales)
+    scale_size = size // 6
+    for row in range(3):
+        for col in range(4):
+            x = col * scale_size + (row % 2) * (scale_size // 2)
+            y = row * scale_size + size // 3
+            if x + scale_size <= size and y + scale_size <= size:
+                points = [
+                    (x + scale_size//2, y),  # top
+                    (x + scale_size, y + scale_size),  # bottom right
+                    (x, y + scale_size)  # bottom left
+                ]
+                pygame.draw.polygon(texture, darker, points)
+                pygame.draw.polygon(texture, color, points, 1)
+
+    # Add closed eyes (two horizontal lines)
+    eye_color = (0, 0, 0)  # Black for closed eyes
+    eye_size = size // 6
+    eye_pos_left = (size // 4, size // 3)
+    eye_pos_right = (3 * size // 4, size // 3)
+
+    # Draw closed eyes as horizontal lines
+    pygame.draw.line(texture, eye_color, (eye_pos_left[0] - eye_size//2, eye_pos_left[1]),
+                     (eye_pos_left[0] + eye_size//2, eye_pos_left[1]), 2)
+    pygame.draw.line(texture, eye_color, (eye_pos_right[0] - eye_size//2, eye_pos_right[1]),
+                     (eye_pos_right[0] + eye_size//2, eye_pos_right[1]), 2)
+
+    return texture
+
 def create_snake_tail_texture(color, size=30):
     """Create a special snake tail texture with a tapered, forked end"""
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
