@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+from utils import lerp, get_segment_position, generate_block_position, get_random_empty_cell, get_tail_direction, get_direction_angle
 
 # === Configuration Parameters and Global Variables ===
 WIDTH, HEIGHT = 800, 600
@@ -381,56 +382,6 @@ class DirectionManager:
         return self.current_direction
 
 # === Functions ===
-def lerp(start, end, t):
-    """Linear interpolation between start and end points"""
-    x1, y1 = start
-    x2, y2 = end
-    return (
-        x1 + (x2 - x1) * t,
-        y1 + (y2 - y1) * t
-    )
-
-def get_segment_position(current_pos, target_pos, frame, total_frames):
-    """Get interpolated position for a snake segment"""
-    if frame >= total_frames:
-        return target_pos
-    t = frame / total_frames
-    t = max(0.0, min(1.0, t))  # Clamp between 0 and 1
-    # Use cubic easing for smoother start/stop
-    t = t * t * (3 - 2 * t)
-    return lerp(current_pos, target_pos, t)
-
-def get_tail_direction(prev_pos, tail_pos):
-    """Calculate the direction vector from tail to previous segment"""
-    dx = prev_pos[0] - tail_pos[0]
-    dy = prev_pos[1] - tail_pos[1]
-    # Normalize to unit vector
-    if dx != 0:
-        dx = dx // abs(dx)
-    if dy != 0:
-        dy = dy // abs(dy)
-    return (dx, dy)
-
-# Movement interpolation parameters
-def lerp(start, end, t):
-    """Linear interpolation between two points"""
-    x1, y1 = start
-    x2, y2 = end
-    return (
-        x1 + (x2 - x1) * t,
-        y1 + (y2 - y1) * t
-    )
-
-def get_segment_position(current, target, frame, total_frames):
-    """Get interpolated position for a snake segment"""
-    if frame >= total_frames:
-        return target
-    t = frame / total_frames
-    t = max(0.0, min(1.0, t))  # Clamp between 0 and 1
-    # Use cubic easing for smoother start/stop
-    t = t * t * (3 - 2 * t)
-    return lerp(current, target, t)
-
 def generate_initial_blocks():
     """Generate initial blocks for the game start"""
     blocks = []
@@ -582,7 +533,6 @@ def main():
         center_x = (WIDTH // SIDE // 2) * SIDE
         center_y = (HEIGHT // SIDE // 2) * SIDE
         snake = [(center_x, center_y)]  # Start at the center of the screen
-        snake_length = len(snake)  # Track snake length for growth
         direction_manager = DirectionManager(None)  # Initialize with no direction
         blocks = generate_initial_blocks()
         score = 0
