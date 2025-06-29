@@ -226,43 +226,29 @@ def get_random_empty_cell(snake_positions=None, block_positions=None):
 def update_blocks(blocks, snake, score):
     """Update blocks positions and handle collisions"""
     snake_head = snake[0]
-    print(f"Snake head at: {snake_head}")
-    print(f"Block positions: {[block.pos for block in blocks]}")
 
     # Check collisions with snake head
     for block in blocks[:]:  # Create a copy of the list to safely modify it
-        # Print comparison of positions for debugging
-        if block.pos[0] == snake_head[0]:
-            print(f"X match found at {block.pos[0]}")
-        if block.pos[1] == snake_head[1]:
-            print(f"Y match found at {block.pos[1]}")
-
         # Check if the snake head overlaps with any block
         if block.pos[0] == snake_head[0] and block.pos[1] == snake_head[1]:
-            print(f"Collision detected with block at {block.pos}!")
             if not block.hit:
-                print("Processing collision...")
                 block.hit = True
                 score_increase = block.handle_collision(snake)
                 score += score_increase
-                print(f"Score increased by {score_increase}")
                 blocks.remove(block)
-                print(f"Block removed. Remaining blocks: {len(blocks)}")
 
                 # Keep the tail position for growing
                 old_tail = snake[-1]
 
                 # Grow the snake by adding a new segment at the tail position
                 snake.append(old_tail)
-                print(f"Snake grown. New length: {len(snake)}")
 
                 # Create a new block in a random empty position
-                forbidden = {pos for pos in snake}
+                forbidden = set(snake)
                 forbidden.update(b.pos for b in blocks)
                 new_block_pos = generate_block_position(forbidden)
                 if new_block_pos:
                     blocks.append(RegularBlock(new_block_pos))
-                    print(f"New block added at {new_block_pos}")
                 break
 
     return score
@@ -388,12 +374,10 @@ def main():
                     (snake[0][0] + direction[0] * STEP) // SIDE * SIDE,
                     (snake[0][1] + direction[1] * STEP) // SIDE * SIDE
                 )
-                print(f"Moving to new head position: {new_head}")
 
                 # Check wall collision
                 if (new_head[0] < 0 or new_head[0] >= WIDTH or
                     new_head[1] < 0 or new_head[1] >= HEIGHT):
-                    print("Wall collision detected!")
                     game_over = True
                     continue
 
