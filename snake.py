@@ -2,10 +2,10 @@ import pygame
 import random
 import sys
 from utils import lerp, get_segment_position, get_tail_direction, get_direction_angle, handle_input
-from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes, create_hen_texture
+from textures import create_gradient_dot_texture, create_serpent_short_thong_head_texture, create_serpent_long_thong_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes, create_hen_texture
 from blocks import Block, HenBlock
 from matrix import generate_block_position, get_random_empty_cell
-from globals import get_tick_counter, close_eyes_ticks, IncreaseCounter, COUNTER, game_over
+from globals import get_tick_counter, close_eyes_ticks, tongue_long_ticks, IncreaseCounter, COUNTER, game_over
 from config import WIDTH, HEIGHT, SIDE, STEP, FPS, SNAKE_SPEED, MOVE_DELAY, N_BLOCKS, RED, BLACK, CYAN, BLOCKS_COLOR, SNAKE_COLOR, SNAKE_HEAD_COLOR, SNAKE_TAIL_COLOR, UP, DOWN, LEFT, RIGHT
 
 def init_textures():
@@ -14,7 +14,7 @@ def init_textures():
 
     BLOCK_TEXTURE = create_hen_texture(SIDE)  # Hen texture for regular blocks
     SNAKE_TEXTURE = create_gradient_dot_texture(SNAKE_COLOR)
-    SNAKE_HEAD_TEXTURE = create_serpent_head_texture(SNAKE_HEAD_COLOR)
+    SNAKE_HEAD_TEXTURE = create_serpent_short_thong_head_texture(SNAKE_HEAD_COLOR)  # Start with open eyes
     SNAKE_TAIL_TEXTURE = create_snake_tail_texture(SNAKE_TAIL_COLOR)
     DIRT_TEXTURE = create_dirt_texture(SIDE)  # Dirt texture for background
 
@@ -24,8 +24,10 @@ def update_head_textures():
     global SNAKE_HEAD_TEXTURE
     if get_tick_counter(close_eyes_ticks):
         SNAKE_HEAD_TEXTURE = create_serpent_head_texture_closed_eyes(SNAKE_HEAD_COLOR)
+    elif get_tick_counter(tongue_long_ticks):
+        SNAKE_HEAD_TEXTURE = create_serpent_long_thong_head_texture(SNAKE_HEAD_COLOR)
     else:
-        SNAKE_HEAD_TEXTURE = create_serpent_head_texture(SNAKE_HEAD_COLOR)
+        SNAKE_HEAD_TEXTURE = create_serpent_short_thong_head_texture(SNAKE_HEAD_COLOR)
 
 def draw_block(display, pos, color, texture=None, rotation=0):
     """Draw a textured block with optional rotation"""
@@ -175,16 +177,16 @@ def draw_blocks(blocks, display):
     for block in blocks:
         block.draw(display)
 
-def draw_snake(display, snake):
+def draw_snake(display, snake, direction_manager):
     """Draw the snake with special head and tail textures, rotating the head."""
     for i, pos in enumerate(snake):
         if i == 0:  # Head
             if len(snake) > 1:
                 head_direction = get_tail_direction(snake[0], snake[1])
-                head_angle = get_direction_angle(head_direction)
-                draw_block(display, pos, SNAKE_HEAD_COLOR, rotation=head_angle)
             else:
-                draw_block(display, pos, SNAKE_HEAD_COLOR)  # No rotation for single-segment snake
+                head_direction = direction_manager.get_next_direction() or RIGHT
+            head_angle = get_direction_angle(head_direction)
+            draw_block(display, pos, SNAKE_HEAD_COLOR, rotation=head_angle)
         elif i == len(snake) - 1:  # Tail
             # Calculate tail direction
             if len(snake) > 1:
@@ -208,7 +210,7 @@ def draw_background(display):
 def initialize_game():
     center_x = (WIDTH // SIDE // 2) * SIDE
     center_y = (HEIGHT // SIDE // 2) * SIDE
-    snake = [(center_x, center_y)]
+    snake = [(center_x, center_y), (center_x - STEP, center_y)]  # Start with head and tail
     direction_manager = DirectionManager(None)
     blocks = generate_initial_blocks()
     score = 0
@@ -235,11 +237,11 @@ def handle_events(game_started, direction_manager):
             direction_manager.handle_key_press(event.key)
     return game_started, game_over
 
-def render_game(display, blocks, snake, score):
+def render_game(display, blocks, snake, score, direction_manager):
     display.fill((0, 0, 0))
     draw_background(display)
     draw_blocks(blocks, display)
-    draw_snake(display, snake)
+    draw_snake(display, snake, direction_manager)
     draw_score_label(display, score)
     pygame.display.flip()
 
@@ -275,7 +277,7 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
         update_head_textures()
 
         if not game_started:
-            render_game(display, blocks, snake, score)
+            render_game(display, blocks, snake, score, direction_manager)
             clock.tick(FPS)
             continue
 
@@ -284,7 +286,7 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
             move_counter = 0
             game_over, score = update_snake(snake, direction_manager, blocks, score)
 
-        render_game(display, blocks, snake, score)
+        render_game(display, blocks, snake, score, direction_manager)
         clock.tick(FPS)
 
     return score

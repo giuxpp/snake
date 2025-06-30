@@ -35,40 +35,24 @@ def create_gradient_dot_texture(color, size=30, dot_size=4):
 
     return texture
 
-def create_serpent_head_texture(color, size=30):
+def create_serpent_long_thong_head_texture(color, size=30):
     """Create a special serpent head texture with scales and eyes, suitable for rotation."""
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
-    texture.fill(color)  # Base color
+    texture.fill((0, 0, 0, 0))  # Transparent background
 
-    # Create darker shade for details
-    darker = (max(0, int(color[0] * 0.6)),
-             max(0, int(color[1] * 0.6)),
-             max(0, int(color[2] * 0.6)))
+    # Define trapezoid points
+    top_width = size // 2
+    height = size
 
-    # Draw base gradient
-    for y in range(size):
-        blend = y / size
-        line_color = (
-            int(darker[0] + (color[0] - darker[0]) * blend),
-            int(darker[1] + (color[1] - darker[1]) * blend),
-            int(darker[2] + (color[2] - darker[2]) * blend)
-        )
-        pygame.draw.line(texture, line_color, (0, y), (size, y))
+    top_left = ((size - top_width) // 2, 0)
+    top_right = ((size + top_width) // 2, 0)
+    bottom_left = (0, height)
+    bottom_right = (size, height)
 
-    # Add snake scales pattern (triangular scales)
-    scale_size = size // 6
-    for row in range(3):
-        for col in range(4):
-            x = col * scale_size + (row % 2) * (scale_size // 2)
-            y = row * scale_size + size // 3
-            if x + scale_size <= size and y + scale_size <= size:
-                points = [
-                    (x + scale_size//2, y),  # top
-                    (x + scale_size, y + scale_size),  # bottom right
-                    (x, y + scale_size)  # bottom left
-                ]
-                pygame.draw.polygon(texture, darker, points)
-                pygame.draw.polygon(texture, color, points, 1)
+    points = [top_left, top_right, bottom_right, bottom_left]
+
+    # Draw trapezoid body
+    pygame.draw.polygon(texture, color, points)
 
     # Add eyes (two glowing circles)
     eye_color = (255, 255, 0)  # Bright yellow eyes
@@ -77,16 +61,82 @@ def create_serpent_head_texture(color, size=30):
     eye_pos_right = (3 * size // 4, size // 3)
 
     # Draw eye outlines (slightly larger)
-    pygame.draw.circle(texture, darker, eye_pos_left, eye_size)
-    pygame.draw.circle(texture, darker, eye_pos_right, eye_size)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_left, eye_size)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_right, eye_size)
     # Draw the actual eyes (smaller)
-    pygame.draw.circle(texture, eye_color, eye_pos_left, eye_size-1)
-    pygame.draw.circle(texture, eye_color, eye_pos_right, eye_size-1)
+    pygame.draw.circle(texture, eye_color, eye_pos_left, eye_size - 1)
+    pygame.draw.circle(texture, eye_color, eye_pos_right, eye_size - 1)
     # Add eye pupils (black)
-    pygame.draw.circle(texture, (0, 0, 0), eye_pos_left, eye_size//2)
-    pygame.draw.circle(texture, (0, 0, 0), eye_pos_right, eye_size//2)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_left, eye_size // 2)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_right, eye_size // 2)
+
+    # Modify red tongue to be 3x larger
+    tongue_color = (255, 0, 0)  # Bright red
+    tongue_width = (size // 10) * 3
+    tongue_height = (size // 6) * 3
+
+    tongue_points = [
+        (size // 2 - tongue_width, size - tongue_height),  # Left bottom
+        (size // 2, size - tongue_height // 2),            # Middle peak
+        (size // 2 + tongue_width, size - tongue_height),  # Right bottom
+        (size // 2, size - tongue_height * 1.5)           # Top center
+    ]
+
+    pygame.draw.polygon(texture, tongue_color, tongue_points)
 
     return texture
+
+def create_serpent_short_thong_head_texture(color, size=30):
+    """Create a special serpent head texture with scales and eyes, suitable for rotation."""
+    texture = pygame.Surface((size, size), pygame.SRCALPHA)
+    texture.fill((0, 0, 0, 0))  # Transparent background
+
+    # Define trapezoid points
+    top_width = size // 2
+    height = size
+
+    top_left = ((size - top_width) // 2, 0)
+    top_right = ((size + top_width) // 2, 0)
+    bottom_left = (0, height)
+    bottom_right = (size, height)
+
+    points = [top_left, top_right, bottom_right, bottom_left]
+
+    # Draw trapezoid body
+    pygame.draw.polygon(texture, color, points)
+
+    # Add eyes (two glowing circles)
+    eye_color = (255, 255, 0)  # Bright yellow eyes
+    eye_size = size // 6
+    eye_pos_left = (size // 4, size // 3)
+    eye_pos_right = (3 * size // 4, size // 3)
+
+    # Draw eye outlines (slightly larger)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_left, eye_size)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_right, eye_size)
+    # Draw the actual eyes (smaller)
+    pygame.draw.circle(texture, eye_color, eye_pos_left, eye_size - 1)
+    pygame.draw.circle(texture, eye_color, eye_pos_right, eye_size - 1)
+    # Add eye pupils (black)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_left, eye_size // 2)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_right, eye_size // 2)
+
+    # Add red tongue ("M" shape)
+    tongue_color = (255, 0, 0)  # Bright red
+    tongue_width = size // 10
+    tongue_height = size // 6
+
+    tongue_points = [
+        (size // 2 - tongue_width, size - tongue_height),  # Left bottom
+        (size // 2, size - tongue_height // 2),            # Middle peak
+        (size // 2 + tongue_width, size - tongue_height),  # Right bottom
+        (size // 2, size - tongue_height * 1.5)           # Top center
+    ]
+
+    pygame.draw.polygon(texture, tongue_color, tongue_points)
+
+    return texture
+
 
 def create_serpent_head_texture_closed_eyes(color, size=30):
     """Create a special serpent head texture with scales and closed eyes."""

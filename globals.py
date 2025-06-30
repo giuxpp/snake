@@ -1,7 +1,7 @@
 # globals.py
 
 # Global counter to track the number of moves made by the snake
-COUNTER = 0
+COUNTER = 1
 
 # Global variable to track the game state
 game_over = False
@@ -16,6 +16,7 @@ DIRT_TEXTURE = None  # Background texture
 
 # Global variable to determine the tick interval for closed eyes
 close_eyes_ticks = 21
+tongue_long_ticks = 33
 
 def get_tick_counter(counts):
     """
@@ -35,8 +36,6 @@ def get_tick_counter(counts):
 
 def IncreaseCounter():
     global COUNTER
-    # Log the counter value in the terminal
-    print(f"COUNTER: {COUNTER}")
     if COUNTER >= 100:
         COUNTER = 1
     else:
