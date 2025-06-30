@@ -3,6 +3,17 @@
 # Global counter to track the number of moves made by the snake
 COUNTER = 0
 
+# Global variable to track the game state
+game_over = False
+
+# Create textures at module level
+BLOCK_TEXTURE = None
+SNAKE_TEXTURE = None
+SNAKE_HEAD_TEXTURE = None
+SNAKE_TAIL_TEXTURE = None
+DIRT_TEXTURE = None  # Background texture
+
+
 # Global variable to determine the tick interval for closed eyes
 close_eyes_ticks = 21
 

@@ -5,39 +5,8 @@ from utils import lerp, get_segment_position, get_tail_direction, get_direction_
 from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes
 from blocks import Block, RegularBlock
 from matrix import generate_block_position, get_random_empty_cell
-from globals import get_tick_counter, close_eyes_ticks, IncreaseCounter
-
-# === Configuration Parameters and Global Variables ===
-WIDTH, HEIGHT = 800, 600
-SIDE = 30
-STEP = SIDE  # All blocks move SIDE on every step
-FPS = 60  # Increased for smoother animation
-SNAKE_SPEED = 8  # Snake moves per second
-MOVE_DELAY = FPS // SNAKE_SPEED  # Frames between each snake movement
-N_BLOCKS = 4
-RED = (255, 0, 0)
-BLACK = (0, 0, 0)
-CYAN = (0, 255, 255)
-BLOCKS_COLOR = YELLOW_MUSTARD = (220, 220, 60)  # Yellow for blocks
-SNAKE_COLOR = GREEN_DARK = (100, 255, 100)  # Darker green for snake
-SNAKE_HEAD_COLOR = (max(0, int(SNAKE_COLOR[0] * 0.6)),
-                    max(0, int(SNAKE_COLOR[1] * 0.6)),
-                    max(0, int(SNAKE_COLOR[2] * 0.6)))
-SNAKE_TAIL_COLOR = (min(250, int(SNAKE_COLOR[0] * 1.8)),
-                    min(250, int(SNAKE_COLOR[1] * 1.6)),
-                    min(250, int(SNAKE_COLOR[2] * 1.4)))
-UP = (0, -1)
-DOWN = (0, 1)
-LEFT = (-1, 0)
-RIGHT = (1, 0)
-game_over = False
-
-# Create textures at module level
-BLOCK_TEXTURE = None
-SNAKE_TEXTURE = None
-SNAKE_HEAD_TEXTURE = None
-SNAKE_TAIL_TEXTURE = None
-DIRT_TEXTURE = None  # Background texture
+from globals import get_tick_counter, close_eyes_ticks, IncreaseCounter, COUNTER, game_over
+from config import WIDTH, HEIGHT, SIDE, STEP, FPS, SNAKE_SPEED, MOVE_DELAY, N_BLOCKS, RED, BLACK, CYAN, BLOCKS_COLOR, SNAKE_COLOR, SNAKE_HEAD_COLOR, SNAKE_TAIL_COLOR, UP, DOWN, LEFT, RIGHT
 
 def init_textures():
     """Initialize all textures with gradient-dot pattern and special head texture"""
@@ -52,7 +21,6 @@ def update_head_textures():
     """Update the head texture based on the current tick counter"""
     """This function updates the snake head texture based on whether the snake's eyes are closed or open."""
     global SNAKE_HEAD_TEXTURE
-    switch_local_var = True
     if get_tick_counter(close_eyes_ticks):
         SNAKE_HEAD_TEXTURE = create_serpent_head_texture_closed_eyes(SNAKE_HEAD_COLOR)
     else:
