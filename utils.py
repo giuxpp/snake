@@ -20,7 +20,14 @@ def get_segment_position(current, target, frame, total_frames):
     t = max(0.0, min(1.0, t))  # Clamp between 0 and 1
     # Use cubic easing for smoother start/stop
     t = t * t * (3 - 2 * t)
-    return lerp(current, target, t)
+
+    # Adjust interpolation to move half the pixels
+    adjusted_target = (
+        current[0] + (target[0] - current[0]) * 0.5,
+        current[1] + (target[1] - current[1]) * 0.5
+    )
+
+    return lerp(current, adjusted_target, t)
 
 def generate_block_position(forbidden, width, height, side):
     """Generate a new random position for a block aligned to the grid"""
