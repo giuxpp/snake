@@ -2,7 +2,7 @@ import pygame
 import random
 import sys
 from utils import lerp, get_segment_position, get_tail_direction, get_direction_angle, handle_input
-from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes
+from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes, create_hen_texture
 from blocks import Block, RegularBlock
 from matrix import generate_block_position, get_random_empty_cell
 from globals import get_tick_counter, close_eyes_ticks, IncreaseCounter, COUNTER, game_over
@@ -12,10 +12,11 @@ def init_textures():
     """Initialize all textures with gradient-dot pattern and special head texture"""
     global BLOCK_TEXTURE, SNAKE_TEXTURE, SNAKE_HEAD_TEXTURE, SNAKE_TAIL_TEXTURE, DIRT_TEXTURE
 
-    BLOCK_TEXTURE = create_gradient_dot_texture(BLOCKS_COLOR)
+    BLOCK_TEXTURE = create_hen_texture(SIDE)  # Hen texture for regular blocks
     SNAKE_TEXTURE = create_gradient_dot_texture(SNAKE_COLOR)
-    SNAKE_TAIL_TEXTURE = create_snake_tail_texture(SNAKE_TAIL_COLOR)  # Special tail texture
-    DIRT_TEXTURE = create_dirt_texture()  # Dirt texture for background
+    SNAKE_HEAD_TEXTURE = create_serpent_head_texture(SNAKE_HEAD_COLOR)
+    SNAKE_TAIL_TEXTURE = create_snake_tail_texture(SNAKE_TAIL_COLOR)
+    DIRT_TEXTURE = create_dirt_texture(SIDE)  # Dirt texture for background
 
 def update_head_textures():
     """Update the head texture based on the current tick counter"""

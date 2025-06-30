@@ -220,3 +220,40 @@ def create_dirt_texture(size=30):
                 texture.set_at((x, y), color)
 
     return texture
+
+# Updated create_hen_texture to remove current eyes and beak, add a new big beak at the bottom, and place two big eyes in the center.
+def create_hen_texture(size=30):
+    """Create a texture resembling a hen with a circular figure, eyes, and a bigger beak"""
+    texture = pygame.Surface((size, size), pygame.SRCALPHA)
+
+    # Draw hen body (circle)
+    body_color = (255, 200, 0)  # Yellow-orange for body
+    pygame.draw.circle(texture, body_color, (size // 2, size // 2), size // 2)
+
+    # Draw bigger beak (larger triangle at the bottom)
+    beak_color = (255, 100, 0)  # Red-orange for beak
+    beak_points = [
+        (size // 2, size - size // 6),  # Bottom point (lower)
+        (size // 2 - size // 4, size - size // 3),  # Left point (wider)
+        (size // 2 + size // 4, size - size // 3)   # Right point (wider)
+    ]
+    pygame.draw.polygon(texture, beak_color, beak_points)
+
+    # Draw small eyes (centered circles)
+    eye_size = size // 10
+
+    # Calculate eye positions
+    eye_pos_left = (size // 2 - size // 5, size // 3)
+    eye_pos_right = (size // 2 + size // 5, size // 3)
+
+    # Draw eye outlines (slightly larger)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_left, eye_size)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_right, eye_size)
+    # Draw the actual eyes (smaller)
+    pygame.draw.circle(texture, (255, 255, 255), eye_pos_left, eye_size - 2)
+    pygame.draw.circle(texture, (255, 255, 255), eye_pos_right, eye_size - 2)
+    # Add eye pupils (black)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_left, eye_size // 3)
+    pygame.draw.circle(texture, (0, 0, 0), eye_pos_right, eye_size // 3)
+
+    return texture

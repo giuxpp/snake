@@ -1,5 +1,6 @@
 import pygame
-from textures import create_gradient_dot_texture
+from textures import create_gradient_dot_texture, create_hen_texture
+from config import SIDE
 
 # === Classes ===
 class Block:
@@ -25,6 +26,9 @@ class Block:
         """Draw the block on the display"""
         if not self.texture:
             self.update_texture()
+            if not self.texture:  # Fallback to a default texture
+                self.texture = pygame.Surface((SIDE, SIDE))
+                self.texture.fill(self.color)
         x, y = self.pos
         display.blit(self.texture, (x, y))
 
@@ -35,6 +39,11 @@ class Block:
 class RegularBlock(Block):
     def __init__(self, pos):
         super().__init__(pos, (220, 220, 60))  # Default block color
+
+    def update_texture(self):
+        """Override update_texture in RegularBlock to use create_hen_texture"""
+        if not self.texture:
+            self.texture = create_hen_texture(SIDE)
 
     def handle_collision(self, snake=None):
         """Regular blocks add 1 to score and make the snake grow"""

@@ -1,6 +1,6 @@
 # Configuration Parameters
-WIDTH = 1000
-HEIGHT = 750
+WIDTH = 1200
+HEIGHT = 900
 SIDE = 30
 STEP = SIDE  # All blocks move SIDE on every step
 FPS = 60  # Increased for smoother animation
