@@ -445,14 +445,26 @@ def update_snake(snake, direction_manager, blocks, score):
         snake.pop()
         return False, score
 
-    # Only check for border collision if BORDER_GAME_OVER is True
     if BORDER_GAME_OVER:
-        # Check for collision with borders or self
-        if (new_head[0] < 0 or new_head[0] >= WIDTH or
-            new_head[1] < 0 or new_head[1] >= HEIGHT or
-            new_head in snake[1:]):
-            print ("SI LLEGUE A GAME OVER")
+        # Check for collision with borders
+        if new_head[0] < 0 or new_head[0] >= WIDTH or new_head[1] < 0 or new_head[1] >= HEIGHT:
+            print("SI LLEGUE A GAME OVER")
             return True, score
+    else:
+        # Handle border wrapping logic
+        if new_head[0] < 0:  # Left border
+            new_head = (WIDTH - SIDE, new_head[1])
+        elif new_head[0] >= WIDTH:  # Right border
+            new_head = (0, new_head[1])
+        elif new_head[1] < 0:  # Top border
+            new_head = (new_head[0], HEIGHT - SIDE)
+        elif new_head[1] >= HEIGHT:  # Bottom border
+            new_head = (new_head[0], 0)
+
+    # Check for collision with itself
+    if new_head in snake[1:]:
+        print("SI LLEGUE A GAME OVER")
+        return True, score
 
     snake.insert(0, new_head)
     IncreaseCounter()
