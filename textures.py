@@ -3,7 +3,17 @@ import random
 
 # === Texture Generation Functions ===
 def create_gradient_dot_texture(color, size=30, dot_size=4):
-    """Create a gradient texture with dots overlay"""
+    """
+    Create a gradient texture with dots overlay.
+
+    Args:
+        color (tuple): Base color for the gradient (R, G, B).
+        size (int): Size of the texture (width and height).
+        dot_size (int): Size of the dots overlay.
+
+    Returns:
+        pygame.Surface: Generated texture with gradient and dots.
+    """
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
 
     # Create gradient from darker to lighter
@@ -36,7 +46,16 @@ def create_gradient_dot_texture(color, size=30, dot_size=4):
     return texture
 
 def create_serpent_long_thong_head_texture(color, size=30):
-    """Create a special serpent head texture with scales and eyes, suitable for rotation."""
+    """
+    Create a special serpent head texture with scales, eyes, and a long tongue.
+
+    Args:
+        color (tuple): Base color for the head (R, G, B).
+        size (int): Size of the texture (width and height).
+
+    Returns:
+        pygame.Surface: Generated texture for the serpent head.
+    """
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
     texture.fill((0, 0, 0, 0))  # Transparent background
 
@@ -87,7 +106,16 @@ def create_serpent_long_thong_head_texture(color, size=30):
     return texture
 
 def create_serpent_short_thong_head_texture(color, size=30):
-    """Create a special serpent head texture with scales and eyes, suitable for rotation."""
+    """
+    Create a special serpent head texture with scales, eyes, and a short tongue.
+
+    Args:
+        color (tuple): Base color for the head (R, G, B).
+        size (int): Size of the texture (width and height).
+
+    Returns:
+        pygame.Surface: Generated texture for the serpent head.
+    """
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
     texture.fill((0, 0, 0, 0))  # Transparent background
 
@@ -139,7 +167,16 @@ def create_serpent_short_thong_head_texture(color, size=30):
 
 
 def create_serpent_head_texture_closed_eyes(color, size=30):
-    """Create a special serpent head texture with scales and closed eyes."""
+    """
+    Create a special serpent head texture with scales and closed eyes.
+
+    Args:
+        color (tuple): Base color for the head (R, G, B).
+        size (int): Size of the texture (width and height).
+
+    Returns:
+        pygame.Surface: Generated texture for the serpent head with closed eyes.
+    """
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
     texture.fill(color)  # Base color
 
@@ -188,7 +225,16 @@ def create_serpent_head_texture_closed_eyes(color, size=30):
     return texture
 
 def create_snake_tail_texture(color, size=30):
-    """Create a special snake tail texture with a tapered, forked end"""
+    """
+    Create a special snake tail texture with a tapered, forked end.
+
+    Args:
+        color (tuple): Base color for the tail (R, G, B).
+        size (int): Size of the texture (width and height).
+
+    Returns:
+        pygame.Surface: Generated texture for the snake tail.
+    """
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
 
     # Create darker shade for details
@@ -242,7 +288,15 @@ def create_snake_tail_texture(color, size=30):
     return texture
 
 def create_dirt_texture(size=30):
-    """Create a grainy brown dirt texture for the background"""
+    """
+    Create a grainy brown dirt texture for the background.
+
+    Args:
+        size (int): Size of the texture (width and height).
+
+    Returns:
+        pygame.Surface: Generated texture for the dirt background.
+    """
     # Base brown color
     base_color = (139, 69, 19)  # Saddle brown
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
@@ -273,7 +327,15 @@ def create_dirt_texture(size=30):
 
 # Updated create_hen_texture to remove current eyes and beak, add a new big beak at the bottom, and place two big eyes in the center.
 def create_hen_texture(size=30):
-    """Create a texture resembling a hen with a circular figure, eyes, and a bigger beak"""
+    """
+    Create a texture resembling a hen with a circular figure, eyes, and a bigger beak.
+
+    Args:
+        size (int): Size of the texture (width and height).
+
+    Returns:
+        pygame.Surface: Generated texture for the hen block.
+    """
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
 
     # Draw hen body (circle)

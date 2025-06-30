@@ -1,4 +1,64 @@
 # Configuration Parameters
+
+"""
+WIDTH: int
+    The width of the game window in pixels.
+
+HEIGHT: int
+    The height of the game window in pixels.
+
+SIDE: int
+    Size of each grid cell in the game.
+
+STEP: int
+    The distance in pixels that all blocks move on every step. Equal to SIDE.
+
+FPS: int
+    Frames per second. Increased for smoother animation.
+
+SNAKE_SPEED: int
+    The speed at which the snake moves, measured in blocks per second.
+
+MOVE_DELAY: int
+    The number of frames between each snake movement. Calculated as FPS // SNAKE_SPEED.
+
+N_BLOCKS: int
+    The number of blocks in the game.
+
+RED: tuple
+    RGB color value for red color.
+
+BLACK: tuple
+    RGB color value for black color.
+
+CYAN: tuple
+    RGB color value for cyan color.
+
+BLOCKS_COLOR: tuple
+    RGB color value for the color of the blocks. Also referred to as YELLOW_MUSTARD.
+
+SNAKE_COLOR: tuple
+    RGB color value for the color of the snake. Also referred to as GREEN_DARK.
+
+SNAKE_HEAD_COLOR: tuple
+    RGB color value for the color of the snake's head. A darker shade of SNAKE_COLOR.
+
+SNAKE_TAIL_COLOR: tuple
+    RGB color value for the color of the snake's tail. A lighter shade of SNAKE_COLOR.
+
+UP: tuple
+    A direction vector indicating upward movement.
+
+DOWN: tuple
+    A direction vector indicating downward movement.
+
+LEFT: tuple
+    A direction vector indicating leftward movement.
+
+RIGHT: tuple
+    A direction vector indicating rightward movement.
+"""
+
 WIDTH = 1200
 HEIGHT = 900
 SIDE = 30

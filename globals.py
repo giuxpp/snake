@@ -35,6 +35,15 @@ def get_tick_counter(counts):
     return COUNTER % counts == 0
 
 def IncreaseCounter():
+    """
+    Increment the global COUNTER variable, resetting it to 1 if it exceeds 100.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     global COUNTER
     if COUNTER >= 100:
         COUNTER = 1
