@@ -1,5 +1,6 @@
 import random
 import pygame  # Import pygame for key constants
+import time
 
 # Utility functions
 
@@ -165,3 +166,27 @@ def handle_input(key, current_direction):
     elif key == pygame.K_RIGHT and current_direction != (-1, 0):  # LEFT
         new_direction = (1, 0)  # RIGHT
     return new_direction
+
+game_start_time = None
+
+def set_game_start_time(start_time):
+    """Set the game start time
+    This function sets the global game start time.
+    Args:
+        start_time (int): The start time in seconds since the epoch.
+    Returns:
+        None
+    """
+    global game_start_time
+    game_start_time = start_time
+
+def get_current_time():
+    """Get the elapsed time since the game started
+    This function returns the elapsed time in seconds since the game started.
+    Returns:
+        int: The elapsed time in seconds.
+    """
+    global game_start_time
+    if game_start_time is None:
+        return 0
+    return int(time.time()) - game_start_time

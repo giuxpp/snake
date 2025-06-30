@@ -1,7 +1,7 @@
 import pygame
 import random
 import sys
-from utils import lerp, get_segment_position, get_tail_direction, get_direction_angle, handle_input
+from utils import lerp, get_segment_position, get_tail_direction, get_direction_angle, handle_input, set_game_start_time, get_current_time
 from textures import create_gradient_dot_texture, create_serpent_short_thong_head_texture, create_serpent_long_thong_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes, create_hen_texture
 from blocks import Block, HenBlock
 from matrix import generate_block_position, get_random_empty_cell
@@ -81,10 +81,10 @@ def draw_block(display, pos, color, texture=None, rotation=0):
         pygame.draw.rect(display, color, pygame.Rect(x, y, SIDE, SIDE))
 
 def show_game_over(screen, score):
-    """Display the game over screen with the final score
+    """Display the game over screen with the final score and elapsed time
     This function shows the game over screen when the game ends. It displays the "GAME OVER"
-    message and the final score. It waits for the player to close the window or press ENTER
-    to restart the game.
+    message, the final score, and the elapsed time. It waits for the player to close the
+    window or press ENTER to restart the game.
     Args:
         screen (Surface): The Pygame surface to draw the game over screen on.
         score (int): The final score to display.
@@ -95,11 +95,21 @@ def show_game_over(screen, score):
     text = font.render("GAME OVER", True, (255, 255, 255))
     text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
     screen.blit(text, text_rect)
+
     font2 = pygame.font.SysFont(None, 60)
-    score_text = font2.render(f"Score: {score}", True, (255, 255, 255))  # White color for score
+    score_text = font2.render(f"Puntos: {score}", True, (255, 255, 255))  # White color for score
     score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
     screen.blit(score_text, score_rect)
+
+    elapsed_time = get_current_time()
+    minutes = elapsed_time // 60
+    seconds = elapsed_time % 60
+    time_text = font2.render(f"TIEMPO: {format_time(elapsed_time)}", True, (255, 255, 255))  # White color for time
+    time_rect = time_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+    screen.blit(time_text, time_rect)
+
     pygame.display.flip()
+
     # Wait for user to close the window or press ENTER to restart
     while True:
         for event in pygame.event.get():
@@ -110,20 +120,28 @@ def show_game_over(screen, score):
                 return True
         pygame.time.wait(50)
 
-def draw_score_label(screen, score):
-    """Draw the score label on the screen
-    This function displays the current score on the screen in the top-right corner. It uses
-    a yellow color for the score text.
+def draw_score_and_time_label(screen, score):
+    """Draw the score and time labels on the screen
+    This function displays the current score and elapsed time on the screen. The score is
+    displayed in the top-right corner, and the elapsed time is displayed below it.
     Args:
-        screen (Surface): The Pygame surface to draw the score label on.
+        screen (Surface): The Pygame surface to draw the labels on.
         score (int): The current score to display.
     Returns:
         None
     """
     font = pygame.font.SysFont(None, 40)
-    text = font.render(f"Score: {score}", True, (255, 255, 0))
-    text_rect = text.get_rect(topright=(WIDTH - 10, 10))
-    screen.blit(text, text_rect)
+
+    # Draw score label
+    score_text = font.render(f"Puntos: {score}", True, (255, 255, 0))
+    score_rect = score_text.get_rect(topright=(WIDTH - 10, 10))
+    screen.blit(score_text, score_rect)
+
+    # Draw time label
+    elapsed_time = get_current_time()
+    time_text = font.render(f"TIEMPO: {format_time(elapsed_time)}", True, (255, 255, 255))
+    time_rect = time_text.get_rect(topright=(WIDTH - 10, 50))
+    screen.blit(time_text, time_rect)
 
 def is_opposite_direction(current, new):
     """Check if new direction is opposite to current direction
@@ -399,7 +417,7 @@ def render_game(display, blocks, snake, score, direction_manager):
     draw_background(display)
     draw_blocks(blocks, display)
     draw_snake(display, snake, direction_manager)
-    draw_score_label(display, score)
+    draw_score_and_time_label(display, score)
     pygame.display.flip()
 
 def update_snake(snake, direction_manager, blocks, score):
@@ -486,6 +504,17 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
 
     return score
 
+def format_time(seconds):
+    """Format time in MIN:SEC format
+    Args:
+        seconds (int): The elapsed time in seconds.
+    Returns:
+        str: The formatted time as MIN:SEC.
+    """
+    minutes = seconds // 60
+    seconds = seconds % 60
+    return f"{minutes:02}:{seconds:02}"
+
 def main():
     """Main entry point of the game
     This function is the main entry point of the game. It initializes Pygame, creates the
@@ -502,6 +531,7 @@ def main():
 
     while True:
         snake, direction_manager, blocks, score, game_started = initialize_game()
+        set_game_start_time(get_current_time())  # Set the game start time
         score = game_loop(display, clock, snake, direction_manager, blocks, score, game_started)
         if not show_game_over(display, score):
             break
