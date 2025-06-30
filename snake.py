@@ -3,7 +3,7 @@ import random
 import sys
 from utils import lerp, get_segment_position, get_tail_direction, get_direction_angle, handle_input
 from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes, create_hen_texture
-from blocks import Block, RegularBlock
+from blocks import Block, HenBlock
 from matrix import generate_block_position, get_random_empty_cell
 from globals import get_tick_counter, close_eyes_ticks, IncreaseCounter, COUNTER, game_over
 from config import WIDTH, HEIGHT, SIDE, STEP, FPS, SNAKE_SPEED, MOVE_DELAY, N_BLOCKS, RED, BLACK, CYAN, BLOCKS_COLOR, SNAKE_COLOR, SNAKE_HEAD_COLOR, SNAKE_TAIL_COLOR, UP, DOWN, LEFT, RIGHT
@@ -136,7 +136,7 @@ def generate_initial_blocks():
     for _ in range(N_BLOCKS):
         pos = generate_block_position(forbidden)
         if pos:
-            blocks.append(RegularBlock(pos))
+            blocks.append(HenBlock(pos))
             forbidden.add(pos)
     return blocks
 
@@ -165,7 +165,7 @@ def update_blocks(blocks, snake, score):
                 forbidden.update(b.pos for b in blocks)
                 new_block_pos = generate_block_position(forbidden)
                 if new_block_pos:
-                    blocks.append(RegularBlock(new_block_pos))
+                    blocks.append(HenBlock(new_block_pos))
                 break
 
     return score

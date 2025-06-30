@@ -36,15 +36,15 @@ class Block:
         """Handle collision with snake. Returns score increase."""
         return 0
 
-class RegularBlock(Block):
+class HenBlock(Block):
     def __init__(self, pos):
         super().__init__(pos, (220, 220, 60))  # Default block color
 
     def update_texture(self):
-        """Override update_texture in RegularBlock to use create_hen_texture"""
+        """Override update_texture in HenBlock to use create_hen_texture"""
         if not self.texture:
             self.texture = create_hen_texture(SIDE)
 
     def handle_collision(self, snake=None):
-        """Regular blocks add 1 to score and make the snake grow"""
+        """Hen blocks add 1 to score and make the snake grow"""
         return 1
