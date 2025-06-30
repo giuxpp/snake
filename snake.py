@@ -5,7 +5,7 @@ from utils import lerp, get_segment_position, get_tail_direction, get_direction_
 from textures import create_gradient_dot_texture, create_serpent_short_thong_head_texture, create_serpent_long_thong_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes, create_hen_texture
 from blocks import Block, HenBlock
 from matrix import generate_block_position, get_random_empty_cell
-from globals import get_tick_counter, close_eyes_ticks, tongue_long_ticks, IncreaseCounter, COUNTER, game_over, SNAKE_PUNCH
+from globals import get_tick_counter, close_eyes_ticks, tongue_long_ticks, IncreaseCounter, COUNTER, game_over, SNAKE_PUNCH, BORDER_GAME_OVER
 from config import WIDTH, HEIGHT, SIDE, STEP, FPS, SNAKE_SPEED, MOVE_DELAY, N_BLOCKS, RED, BLACK, CYAN, BLOCKS_COLOR, SNAKE_COLOR, SNAKE_HEAD_COLOR, SNAKE_TAIL_COLOR, UP, DOWN, LEFT, RIGHT
 
 def init_textures():
@@ -445,10 +445,14 @@ def update_snake(snake, direction_manager, blocks, score):
         snake.pop()
         return False, score
 
-    if (new_head[0] < 0 or new_head[0] >= WIDTH or
-        new_head[1] < 0 or new_head[1] >= HEIGHT or
-        new_head in snake[1:]):
-        return True, score
+    # Only check for border collision if BORDER_GAME_OVER is True
+    if BORDER_GAME_OVER:
+        # Check for collision with borders or self
+        if (new_head[0] < 0 or new_head[0] >= WIDTH or
+            new_head[1] < 0 or new_head[1] >= HEIGHT or
+            new_head in snake[1:]):
+            print ("SI LLEGUE A GAME OVER")
+            return True, score
 
     snake.insert(0, new_head)
     IncreaseCounter()
