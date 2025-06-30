@@ -364,7 +364,11 @@ def handle_events(game_started, direction_manager):
             if not game_started and event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
                 game_started = True
                 direction_manager.current_direction = None
-                direction_manager.handle_key_press(event.key)
+                try:
+                    direction_manager.handle_key_press(event.key)
+                except Exception:
+                    # Handle exception gracefully and allow movement
+                    direction_manager.current_direction = LEFT
             direction_manager.handle_key_press(event.key)
     return game_started, game_over
 
@@ -406,6 +410,12 @@ def update_snake(snake, direction_manager, blocks, score):
         (snake[0][0] + direction[0] * STEP) // SIDE * SIDE,
         (snake[0][1] + direction[1] * STEP) // SIDE * SIDE
     )
+
+    # Ensure the initial movement does not trigger a collision
+    if len(snake) == 2 and new_head == snake[1]:
+        snake.insert(0, new_head)
+        snake.pop()
+        return False, score
 
     if (new_head[0] < 0 or new_head[0] >= WIDTH or
         new_head[1] < 0 or new_head[1] >= HEIGHT or
