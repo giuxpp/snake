@@ -2,10 +2,10 @@ import pygame
 import random
 import sys
 from utils import lerp, get_segment_position, get_tail_direction, get_direction_angle, handle_input
-from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture
+from textures import create_gradient_dot_texture, create_serpent_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes
 from blocks import Block, RegularBlock
 from matrix import generate_block_position, get_random_empty_cell
-from globals import COUNTER, get_tick_counter
+from globals import get_tick_counter, close_eyes_ticks, IncreaseCounter
 
 # === Configuration Parameters and Global Variables ===
 WIDTH, HEIGHT = 800, 600
@@ -45,9 +45,18 @@ def init_textures():
 
     BLOCK_TEXTURE = create_gradient_dot_texture(BLOCKS_COLOR)
     SNAKE_TEXTURE = create_gradient_dot_texture(SNAKE_COLOR)
-    SNAKE_HEAD_TEXTURE = create_serpent_head_texture(SNAKE_HEAD_COLOR)  # Special head texture
     SNAKE_TAIL_TEXTURE = create_snake_tail_texture(SNAKE_TAIL_COLOR)  # Special tail texture
     DIRT_TEXTURE = create_dirt_texture()  # Dirt texture for background
+
+def update_head_textures():
+    """Update the head texture based on the current tick counter"""
+    """This function updates the snake head texture based on whether the snake's eyes are closed or open."""
+    global SNAKE_HEAD_TEXTURE
+    switch_local_var = True
+    if get_tick_counter(close_eyes_ticks):
+        SNAKE_HEAD_TEXTURE = create_serpent_head_texture_closed_eyes(SNAKE_HEAD_COLOR)
+    else:
+        SNAKE_HEAD_TEXTURE = create_serpent_head_texture(SNAKE_HEAD_COLOR)
 
 def draw_block(display, pos, color, texture=None, rotation=0):
     """Draw a textured block with optional rotation"""
@@ -224,116 +233,104 @@ def draw_background(display):
         for y in range(0, HEIGHT, SIDE):
             display.blit(DIRT_TEXTURE, (x, y))
 
-# === Main Function ===
+# Refactored main function to reduce cognitive complexity
+# Extracted game initialization and game loop logic into separate functions
+
+def initialize_game():
+    center_x = (WIDTH // SIDE // 2) * SIDE
+    center_y = (HEIGHT // SIDE // 2) * SIDE
+    snake = [(center_x, center_y)]
+    direction_manager = DirectionManager(None)
+    blocks = generate_initial_blocks()
+    score = 0
+    game_started = False
+    return snake, direction_manager, blocks, score, game_started
+
+# Further refactored game_loop to reduce cognitive complexity
+# Extracted event handling and rendering logic into separate functions
+
+def handle_events(game_started, direction_manager):
+    game_over = False
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if game_started and event.key == pygame.K_ESCAPE:
+                game_over = True
+                continue
+            if not game_started and event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
+                game_started = True
+                direction_manager.current_direction = None
+                direction_manager.handle_key_press(event.key)
+            direction_manager.handle_key_press(event.key)
+    return game_started, game_over
+
+def render_game(display, blocks, snake, score):
+    display.fill((0, 0, 0))
+    draw_background(display)
+    draw_blocks(blocks, display)
+    draw_snake(display, snake)
+    draw_score_label(display, score)
+    pygame.display.flip()
+
+def update_snake(snake, direction_manager, blocks, score):
+    direction = direction_manager.get_next_direction() or RIGHT
+    new_head = (
+        (snake[0][0] + direction[0] * STEP) // SIDE * SIDE,
+        (snake[0][1] + direction[1] * STEP) // SIDE * SIDE
+    )
+
+    if (new_head[0] < 0 or new_head[0] >= WIDTH or
+        new_head[1] < 0 or new_head[1] >= HEIGHT or
+        new_head in snake[1:]):
+        return True, score
+
+    snake.insert(0, new_head)
+    IncreaseCounter()
+    old_score = score
+    score = update_blocks(blocks, snake, score)
+
+    if score == old_score:
+        snake.pop()
+
+    return False, score
+
+def game_loop(display, clock, snake, direction_manager, blocks, score, game_started):
+    move_counter = 0
+    game_over = False
+
+    while not game_over:
+        game_started, game_over = handle_events(game_started, direction_manager)
+
+        update_head_textures()
+
+        if not game_started:
+            render_game(display, blocks, snake, score)
+            clock.tick(FPS)
+            continue
+
+        move_counter += 1
+        if move_counter >= MOVE_DELAY:
+            move_counter = 0
+            game_over, score = update_snake(snake, direction_manager, blocks, score)
+
+        render_game(display, blocks, snake, score)
+        clock.tick(FPS)
+
+    return score
+
 def main():
-    global COUNTER
-    # Initialize Pygame and create the display
     pygame.init()
-    display = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)  # Make the window non-resizable
+    display = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
     pygame.display.set_caption("Snake Game")
     clock = pygame.time.Clock()
+    init_textures()  # Initialize textures once at the start
 
-    # Initialize textures once
-    init_textures()
-
-    while True:  # Main game loop for multiple plays
-        # Initialize game state
-        center_x = (WIDTH // SIDE // 2) * SIDE
-        center_y = (HEIGHT // SIDE // 2) * SIDE
-        snake = [(center_x, center_y)]  # Start at the center of the screen
-        direction_manager = DirectionManager(None)  # Initialize with no direction
-        blocks = generate_initial_blocks()
-        score = 0
-        game_over = False
-        move_counter = 0  # Counter for move delay
-        game_started = False  # Flag to track if the game has started
-
-        # Game loop for one play
-        while not game_over:
-            # Event handling
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    # End game if ESC is pressed during gameplay
-                    if game_started and event.key == pygame.K_ESCAPE:
-                        game_over = True
-                        continue
-                    # Start game on first arrow key press
-                    if not game_started and event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
-                        game_started = True
-                        direction_manager.current_direction = None  # Reset initial direction
-                        direction_manager.handle_key_press(event.key)  # Set initial direction based on first key press
-                    direction_manager.handle_key_press(event.key)
-
-            # Don't update snake position until game has started
-            if not game_started:
-                # Just draw the initial state
-                display.fill((0, 0, 0))  # Clear screen
-                draw_background(display)  # Draw background texture
-                draw_blocks(blocks, display)
-                draw_snake(display, snake)
-                draw_score_label(display, score)
-                pygame.display.flip()
-                clock.tick(FPS)
-                continue
-
-            # Update game state
-            move_counter += 1
-            if move_counter >= MOVE_DELAY:
-                move_counter = 0
-
-                # Update snake position
-                direction = direction_manager.get_next_direction()
-                if direction is None:
-                    direction = RIGHT  # Default to RIGHT if no direction is set
-                # Ensure we're moving in grid-aligned steps
-                new_head = (
-                    (snake[0][0] + direction[0] * STEP) // SIDE * SIDE,
-                    (snake[0][1] + direction[1] * STEP) // SIDE * SIDE
-                )
-
-                # Check wall collision
-                if (new_head[0] < 0 or new_head[0] >= WIDTH or
-                    new_head[1] < 0 or new_head[1] >= HEIGHT):
-                    game_over = True
-                    continue
-
-                # Check for collisions with self
-                if new_head in snake[1:]:
-                    game_over = True
-                    continue
-
-                # Move snake
-                snake.insert(0, new_head)
-
-                # Increment the global COUNTER for each move
-                COUNTER += 1
-
-                # Update blocks and score - this will grow the snake if a block is hit
-                old_score = score
-                score = update_blocks(blocks, snake, score)
-
-                # Only remove tail if we didn't collect a block (score didn't change)
-                if score == old_score:
-                    snake.pop()
-
-                # Example usage of get_tick_counter
-                if get_tick_counter(5):
-                    print("Event triggered at move count:", COUNTER)
-
-            # Drawing
-            display.fill((0, 0, 0))  # Clear screen
-            draw_background(display)  # Draw the background texture
-            draw_blocks(blocks, display)
-            draw_snake(display, snake)
-            draw_score_label(display, score)
-            pygame.display.flip()
-            clock.tick(FPS)
-
-        # Game Over screen
-        if not show_game_over(display, score):  # If show_game_over returns False, exit game
+    while True:
+        snake, direction_manager, blocks, score, game_started = initialize_game()
+        score = game_loop(display, clock, snake, direction_manager, blocks, score, game_started)
+        if not show_game_over(display, score):
             break
 
 if __name__ == "__main__":
