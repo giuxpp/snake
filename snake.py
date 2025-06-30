@@ -5,7 +5,7 @@ from utils import lerp, get_segment_position, get_tail_direction, get_direction_
 from textures import create_gradient_dot_texture, create_serpent_short_thong_head_texture, create_serpent_long_thong_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes, create_hen_texture
 from blocks import Block, HenBlock
 from matrix import generate_block_position, get_random_empty_cell
-from globals import get_tick_counter, close_eyes_ticks, tongue_long_ticks, IncreaseCounter, COUNTER, game_over
+from globals import get_tick_counter, close_eyes_ticks, tongue_long_ticks, IncreaseCounter, COUNTER, game_over, SNAKE_PUNCH
 from config import WIDTH, HEIGHT, SIDE, STEP, FPS, SNAKE_SPEED, MOVE_DELAY, N_BLOCKS, RED, BLACK, CYAN, BLOCKS_COLOR, SNAKE_COLOR, SNAKE_HEAD_COLOR, SNAKE_TAIL_COLOR, UP, DOWN, LEFT, RIGHT
 
 def init_textures():
@@ -150,15 +150,18 @@ class DirectionManager:
         self.current_direction = initial_direction
         self.direction_queue = []
 
-    def handle_key_press(self, key):
-        """Handle keyboard input for direction changes
-        This function handles the keyboard input for changing the snake's direction. It
-        converts the key press into a direction vector and queues the new direction.
+    def handle_key_press(self, key, is_pressed):
+        """Handle keyboard input for direction changes and SNAKE_PUNCH logic
+        This function handles the keyboard input for changing the snake's direction and
+        updates the SNAKE_PUNCH state based on key press/release events.
         Args:
-            key (int): The key code of the pressed key.
+            key (int): The key code of the pressed/released key.
+            is_pressed (bool): True if the key is pressed, False if released.
         Returns:
             None
         """
+        global SNAKE_PUNCH
+
         new_direction = None
         if key == pygame.K_UP:
             new_direction = UP
@@ -169,8 +172,14 @@ class DirectionManager:
         elif key == pygame.K_RIGHT:
             new_direction = RIGHT
 
-        if new_direction:
-            self.queue_direction(new_direction)
+        if is_pressed:
+            # This will emulate a small delay after key press to start the punch
+            if get_tick_counter(2):
+                SNAKE_PUNCH = 2
+            if new_direction:
+                self.queue_direction(new_direction)
+        else:
+            SNAKE_PUNCH = 1
 
     def queue_direction(self, new_direction):
         """Try to queue a new direction, ensuring no 180-degree turns
@@ -357,19 +366,20 @@ def handle_events(game_started, direction_manager):
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        if event.type == pygame.KEYDOWN:
+        if event.type in (pygame.KEYDOWN, pygame.KEYUP):
+            is_pressed = event.type == pygame.KEYDOWN
             if game_started and event.key == pygame.K_ESCAPE:
                 game_over = True
                 continue
-            if not game_started and event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
+            if not game_started and is_pressed and event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
                 game_started = True
                 direction_manager.current_direction = None
                 try:
-                    direction_manager.handle_key_press(event.key)
+                    direction_manager.handle_key_press(event.key, is_pressed)
                 except Exception:
                     # Handle exception gracefully and allow movement
                     direction_manager.current_direction = LEFT
-            direction_manager.handle_key_press(event.key)
+            direction_manager.handle_key_press(event.key, is_pressed)
     return game_started, game_over
 
 def render_game(display, blocks, snake, score, direction_manager):
@@ -448,11 +458,16 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
     Returns:
         int: The final score when the game is over.
     """
+    global SNAKE_PUNCH
     move_counter = 0
     game_over = False
 
     while not game_over:
         game_started, game_over = handle_events(game_started, direction_manager)
+
+        # Ensure SNAKE_PUNCH is reset to 1 if no button is pressed
+        if not pygame.key.get_pressed():
+            SNAKE_PUNCH = 1
 
         update_head_textures()
 
@@ -462,7 +477,7 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
             continue
 
         move_counter += 1
-        if move_counter >= MOVE_DELAY:
+        if move_counter >= MOVE_DELAY // SNAKE_PUNCH:
             move_counter = 0
             game_over, score = update_snake(snake, direction_manager, blocks, score)
 

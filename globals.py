@@ -6,6 +6,9 @@ COUNTER = 1
 # Global variable to track the game state
 game_over = False
 
+# Constants for snake movement: 1=Regular Movement  2=Snake Punch (faster)
+SNAKE_PUNCH = 1
+
 # Create textures at module level
 BLOCK_TEXTURE = None
 SNAKE_TEXTURE = None
@@ -21,13 +24,10 @@ tongue_long_ticks = 33
 def get_tick_counter(counts):
     """
     Check if the global COUNTER is a multiple of the given `counts`.
-
     Args:
         counts (int): The number to check divisibility against.
-
     Returns:
         bool: True if COUNTER is a multiple of `counts`, False otherwise.
-
     Example:
         get_tick_counter(5) will return True if COUNTER is 5, 10, 15, etc.,
         and False for other values like 2, 3, 4, 6, 7, etc.
@@ -37,10 +37,8 @@ def get_tick_counter(counts):
 def IncreaseCounter():
     """
     Increment the global COUNTER variable, resetting it to 1 if it exceeds 100.
-
     Args:
         None
-
     Returns:
         None
     """

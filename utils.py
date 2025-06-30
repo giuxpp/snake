@@ -35,6 +35,8 @@ def get_segment_position(current, target, frame, total_frames):
     Returns:
         tuple: Interpolated position (x, y).
     """
+    MOVE_RESOLUTION = 0.25
+
     if frame >= total_frames:
         return target
     t = frame / total_frames
@@ -44,8 +46,8 @@ def get_segment_position(current, target, frame, total_frames):
 
     # Adjust interpolation to move half the pixels
     adjusted_target = (
-        current[0] + (target[0] - current[0]) * 0.5,
-        current[1] + (target[1] - current[1]) * 0.5
+        current[0] + (target[0] - current[0]) * MOVE_RESOLUTION,
+        current[1] + (target[1] - current[1]) * MOVE_RESOLUTION
     )
 
     return lerp(current, adjusted_target, t)
