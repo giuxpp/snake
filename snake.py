@@ -490,7 +490,7 @@ def update_snake(snake, direction_manager, blocks, score):
     Returns:
         tuple: A tuple containing a game over flag and the updated score.
     """
-    global SELF_COLLISION_GAME_OVER
+    global SELF_COLLISION_GAME_OVER, BORDER_GAME_OVER
     direction = direction_manager.get_next_direction() or RIGHT
     new_head = (
         (snake[0][0] + direction[0] * STEP) // SIDE * SIDE,
@@ -594,6 +594,57 @@ def format_time(seconds):
     seconds = seconds % 60
     return f"{minutes:02}:{seconds:02}"
 
+def display_level_selection_menu(screen):
+    """Display a menu to select the game level.
+    Args:
+        screen (Surface): The Pygame surface to draw the menu on.
+    Returns:
+        int: The selected level (1 for Easy, 2 for Medium, 3 for Hard).
+    """
+    # Clear display
+    screen.fill((0, 0, 0))  # Fill the screen with black
+    pygame.display.flip()
+
+    font = pygame.font.SysFont(None, 60)
+
+    # Display the menu title
+    title_text = font.render("SELECCIONA NIVEL", True, (255, 255, 255))
+    title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 100))
+    screen.blit(title_text, title_rect)
+
+    # Display level options
+    easy_text = font.render("FACIL (1)", True, (0, 255, 0))
+    easy_rect = easy_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 30))
+    screen.blit(easy_text, easy_rect)
+
+    medium_text = font.render("MEDIO (2)", True, (255, 255, 0))
+    medium_rect = medium_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 30))
+    screen.blit(medium_text, medium_rect)
+
+    hard_text = font.render("DIFICIL (3)", True, (255, 0, 0))
+    hard_rect = hard_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 90))
+    screen.blit(hard_text, hard_rect)
+
+    pygame.display.flip()
+
+    # Wait for user input
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    select_level(1)
+                    return
+                elif event.key == pygame.K_2:
+                    select_level(2)
+                    return
+                elif event.key == pygame.K_3:
+                    select_level(3)
+                    return
+        pygame.time.wait(50)
+
 def main():
     """Main entry point of the game
     This function is the main entry point of the game. It initializes Pygame, creates the
@@ -612,6 +663,7 @@ def main():
     while True:
         snake, direction_manager, blocks, score, game_started = initialize_game()
         game_start_time = None  # Reset game start time on restart
+        display_level_selection_menu(display)
         score = game_loop(display, clock, snake, direction_manager, blocks, score, game_started)
         if not show_game_over(display, score):
             break
