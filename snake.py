@@ -447,6 +447,7 @@ def update_snake(snake, direction_manager, blocks, score):
     Returns:
         tuple: A tuple containing a game over flag and the updated score.
     """
+    global SELF_COLLISION_GAME_OVER
     direction = direction_manager.get_next_direction() or RIGHT
     new_head = (
         (snake[0][0] + direction[0] * STEP) // SIDE * SIDE,
@@ -462,7 +463,6 @@ def update_snake(snake, direction_manager, blocks, score):
     if BORDER_GAME_OVER:
         # Check for collision with borders
         if new_head[0] < 0 or new_head[0] >= WIDTH or new_head[1] < 0 or new_head[1] >= HEIGHT:
-            print("SI LLEGUE A GAME OVER")
             return True, score
     else:
         # Handle border wrapping logic
@@ -476,9 +476,8 @@ def update_snake(snake, direction_manager, blocks, score):
             new_head = (new_head[0], 0)
 
     # Check for collision with itself
-    if new_head in snake[1:]:
-        print("SI LLEGUE A GAME OVER")
-        return True, score
+    if SELF_COLLISION_GAME_OVER:
+        if new_head in snake[1:]: return True, score
 
     snake.insert(0, new_head)
     increase_counter()

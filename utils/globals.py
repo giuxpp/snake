@@ -37,6 +37,9 @@ tongue_long_ticks = 33
 # Add a global variable to control border collision game over
 BORDER_GAME_OVER = False
 
+# Add a global variable to control self-collision game over
+SELF_COLLISION_GAME_OVER = False
+
 def get_tick_counter(counts):
     """
     Check if the global COUNTER is a multiple of the given `counts`.
