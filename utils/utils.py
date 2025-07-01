@@ -11,12 +11,10 @@ game_start_time = None
 def lerp(start, end, t):
     """
     Linear interpolation between start and end points.
-
     Args:
         start (tuple): Starting point (x, y).
         end (tuple): Ending point (x, y).
         t (float): Interpolation factor (0 <= t <= 1).
-
     Returns:
         tuple: Interpolated point (x, y).
     """
@@ -30,13 +28,11 @@ def lerp(start, end, t):
 def get_segment_position(current, target, frame, total_frames):
     """
     Get interpolated position for a snake segment.
-
     Args:
         current (tuple): Current position of the segment (x, y).
         target (tuple): Target position of the segment (x, y).
         frame (int): Current frame number.
         total_frames (int): Total number of frames for the movement.
-
     Returns:
         tuple: Interpolated position (x, y).
     """
@@ -60,13 +56,11 @@ def get_segment_position(current, target, frame, total_frames):
 def generate_block_position(forbidden, width, height, side):
     """
     Generate a new random position for a block aligned to the grid.
-
     Args:
         forbidden (set): Set of positions that cannot be used.
         width (int): Width of the game area.
         height (int): Height of the game area.
         side (int): Size of each grid cell.
-
     Returns:
         tuple: Random position (x, y) or None if no valid positions are available.
     """
@@ -89,14 +83,12 @@ def generate_block_position(forbidden, width, height, side):
 def get_random_empty_cell(snake_positions=None, block_positions=None, width=None, height=None, side=None):
     """
     Get a random empty cell that's not occupied by snake or blocks.
-
     Args:
         snake_positions (list): List of positions occupied by the snake.
         block_positions (list): List of positions occupied by blocks.
         width (int): Width of the game area.
         height (int): Height of the game area.
         side (int): Size of each grid cell.
-
     Returns:
         tuple: Random empty position (x, y) or None if no valid positions are available.
     """
@@ -110,11 +102,9 @@ def get_random_empty_cell(snake_positions=None, block_positions=None, width=None
 def get_tail_direction(prev_pos, tail_pos):
     """
     Calculate the direction vector from tail to previous segment.
-
     Args:
         prev_pos (tuple): Position of the previous segment (x, y).
         tail_pos (tuple): Position of the tail segment (x, y).
-
     Returns:
         tuple: Direction vector (dx, dy).
     """
@@ -130,10 +120,8 @@ def get_tail_direction(prev_pos, tail_pos):
 def get_direction_angle(direction):
     """
     Convert a direction vector to an angle in degrees.
-
     Args:
         direction (tuple): Direction vector (dx, dy).
-
     Returns:
         int: Angle in degrees corresponding to the direction.
     """
@@ -152,11 +140,9 @@ def get_direction_angle(direction):
 def handle_input(key, current_direction):
     """
     Handle keyboard input for direction changes.
-
     Args:
         key (int): Key pressed (pygame key constant).
         current_direction (tuple): Current direction vector (dx, dy).
-
     Returns:
         tuple: New direction vector (dx, dy).
     """
@@ -193,3 +179,26 @@ def get_current_time():
         return 0
     elapsed_time = int(time.time()) - game_start_time
     return elapsed_time
+
+def format_time(seconds):
+    """Format time in MIN:SEC format
+    Args:
+        seconds (int): The elapsed time in seconds.
+    Returns:
+        str: The formatted time as MIN:SEC.
+    """
+    minutes = seconds // 60
+    seconds = seconds % 60
+    return f"{minutes:02}:{seconds:02}"
+
+def is_opposite_direction(current, new):
+    """Check if new direction is opposite to current direction
+    This function checks if the new direction is opposite to the current direction. It is
+    used to prevent the snake from making 180-degree turns.
+    Args:
+        current (tuple): The current direction (dx, dy).
+        new (tuple): The new direction (dx, dy) to check.
+    Returns:
+        bool: True if the new direction is opposite to the current direction, False otherwise.
+    """
+    return (current[0] == -new[0] and current[1] == -new[1])

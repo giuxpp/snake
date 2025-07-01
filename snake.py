@@ -103,7 +103,8 @@ def show_game_over(screen, score):
 
     # Display the final score
     font2 = pygame.font.SysFont(None, 60)
-    score_text = font2.render(f"Puntos: {score}/{TOTAL_SCORE_TO_WIN}", True, (255, 255, 255))  # White color for score
+    total_score_to_win = game_config["total_score_to_win"]
+    score_text = font2.render(f"Puntos: {score}/{total_score_to_win}", True, (255, 255, 255))  # White color for score
     score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
     screen.blit(score_text, score_rect)
 
@@ -148,7 +149,8 @@ def show_game_win(screen, score):
 
     # Display the final score
     font2 = pygame.font.SysFont(None, 60)
-    score_text = font2.render(f"Puntos: {score}/{TOTAL_SCORE_TO_WIN}", True, (255, 255, 255))  # White color for score
+    total_score_to_win = game_config["total_score_to_win"]
+    score_text = font2.render(f"Puntos: {score}/{total_score_to_win}", True, (255, 255, 255))  # White color for score
     score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
     screen.blit(score_text, score_rect)
 
@@ -172,13 +174,14 @@ def show_game_win(screen, score):
                 return True
         pygame.time.wait(50)
 
-def draw_score_and_time_label(screen, score):
-    """Draw the score and time labels on the screen
-    This function displays the current score and elapsed time on the screen. The score is
-    displayed in the top-right corner, and the elapsed time is displayed below it.
+def draw_score_time_and_level_label(screen, score, level):
+    """Draw the score, time, and level labels on the screen
+    This function displays the current score, elapsed time, and selected level on the screen.
+    The score is displayed in the top-right corner, the elapsed time below it, and the level below the time.
     Args:
         screen (Surface): The Pygame surface to draw the labels on.
         score (int): The current score to display.
+        level (str): The selected level to display.
     Returns:
         None
     """
@@ -195,17 +198,10 @@ def draw_score_and_time_label(screen, score):
     time_rect = time_text.get_rect(topright=(WIDTH - 10, 50))
     screen.blit(time_text, time_rect)
 
-def is_opposite_direction(current, new):
-    """Check if new direction is opposite to current direction
-    This function checks if the new direction is opposite to the current direction. It is
-    used to prevent the snake from making 180-degree turns.
-    Args:
-        current (tuple): The current direction (dx, dy).
-        new (tuple): The new direction (dx, dy) to check.
-    Returns:
-        bool: True if the new direction is opposite to the current direction, False otherwise.
-    """
-    return (current[0] == -new[0] and current[1] == -new[1])
+    # Draw level label
+    level_text = font.render(f"NIVEL: {level.upper()}", True, (255, 255, 255))
+    level_rect = level_text.get_rect(topright=(WIDTH - 10, 90))
+    screen.blit(level_text, level_rect)
 
 # === Classes ===
 class DirectionManager:
@@ -431,7 +427,7 @@ def handle_events(game_started, direction_manager):
     Returns:
         tuple: A tuple containing the updated game started flag and game over flag.
     """
-    game_over = False
+    GAME_OVER = False
     global GAME_RUNNING
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -440,7 +436,7 @@ def handle_events(game_started, direction_manager):
         if event.type in (pygame.KEYDOWN, pygame.KEYUP):
             is_pressed = event.type == pygame.KEYDOWN
             if game_started and event.key == pygame.K_ESCAPE:
-                game_over = True
+                GAME_OVER = True
                 continue
             if not game_started and is_pressed and event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
                 game_started = True
@@ -453,18 +449,19 @@ def handle_events(game_started, direction_manager):
                 except Exception:
                     direction_manager.current_direction = LEFT
             direction_manager.handle_key_press(event.key, is_pressed)
-    return game_started, game_over
+    return game_started, GAME_OVER
 
-def render_game(display, blocks, snake, score, direction_manager):
+def render_game(display, blocks, snake, score, direction_manager, level):
     """Render the game elements on the display
     This function renders all the game elements on the display, including the background,
-    blocks, snake, and score label. It updates the display with the rendered content.
+    blocks, snake, score label, time label, and level label. It updates the display with the rendered content.
     Args:
         display (Surface): The Pygame surface to draw on.
         blocks (list): The list of current blocks in the game.
         snake (list): The current snake body segments.
         score (int): The current score of the player.
         direction_manager (DirectionManager): The direction manager for handling snake direction.
+        level (str): The selected level to display.
     Returns:
         None
     """
@@ -474,7 +471,7 @@ def render_game(display, blocks, snake, score, direction_manager):
     draw_blocks(blocks, display)
     draw_snake(display, snake, direction_manager)
     if GAME_RUNNING:
-        draw_score_and_time_label(display, score)
+        draw_score_time_and_level_label(display, score, level)
     pygame.display.flip()
 
 def update_snake(snake, direction_manager, blocks, score):
@@ -490,7 +487,6 @@ def update_snake(snake, direction_manager, blocks, score):
     Returns:
         tuple: A tuple containing a game over flag and the updated score.
     """
-    global SELF_COLLISION_GAME_OVER, BORDER_GAME_OVER
     direction = direction_manager.get_next_direction() or RIGHT
     new_head = (
         (snake[0][0] + direction[0] * STEP) // SIDE * SIDE,
@@ -503,7 +499,7 @@ def update_snake(snake, direction_manager, blocks, score):
         snake.pop()
         return False, score
 
-    if BORDER_GAME_OVER:
+    if game_config["border_game_over"]:
         # Check for collision with borders
         if new_head[0] < 0 or new_head[0] >= WIDTH or new_head[1] < 0 or new_head[1] >= HEIGHT:
             return True, score
@@ -519,7 +515,7 @@ def update_snake(snake, direction_manager, blocks, score):
             new_head = (new_head[0], 0)
 
     # Check for collision with itself
-    if SELF_COLLISION_GAME_OVER:
+    if game_config["self_collision_game_over"]:
         if new_head in snake[1:]: return True, score
 
     snake.insert(0, new_head)
@@ -532,7 +528,7 @@ def update_snake(snake, direction_manager, blocks, score):
 
     return False, score
 
-def game_loop(display, clock, snake, direction_manager, blocks, score, game_started):
+def game_loop(display, clock, snake, direction_manager, blocks, score, game_started, level):
     """Main game loop
     This function is the main loop of the game. It handles the game events, updates the
     game state, and renders the game elements. It continues running until the game is
@@ -545,6 +541,7 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
         blocks (list): The list of current blocks in the game.
         score (int): The current score of the player.
         game_started (bool): The flag indicating if the game has started.
+        level (str): The selected level to display.
     Returns:
         int: The final score when the game is over.
     """
@@ -564,7 +561,7 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
         update_head_textures()
 
         if not game_started:
-            render_game(display, blocks, snake, score, direction_manager)
+            render_game(display, blocks, snake, score, direction_manager, level)
             clock.tick(FPS)
             continue
 
@@ -573,7 +570,7 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
             move_counter = 0
             game_over, score = update_snake(snake, direction_manager, blocks, score)
 
-        render_game(display, blocks, snake, score, direction_manager)
+        render_game(display, blocks, snake, score, direction_manager, level)
         clock.tick(FPS)
 
         if score >= TOTAL_SCORE_TO_WIN:
@@ -582,17 +579,6 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
                 break
 
     return score
-
-def format_time(seconds):
-    """Format time in MIN:SEC format
-    Args:
-        seconds (int): The elapsed time in seconds.
-    Returns:
-        str: The formatted time as MIN:SEC.
-    """
-    minutes = seconds // 60
-    seconds = seconds % 60
-    return f"{minutes:02}:{seconds:02}"
 
 def display_level_selection_menu(screen):
     """Display a menu to select the game level.
@@ -613,15 +599,15 @@ def display_level_selection_menu(screen):
     screen.blit(title_text, title_rect)
 
     # Display level options
-    easy_text = font.render("FACIL (1)", True, (0, 255, 0))
+    easy_text = font.render("Baby (1)", True, (0, 255, 0))
     easy_rect = easy_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 30))
     screen.blit(easy_text, easy_rect)
 
-    medium_text = font.render("MEDIO (2)", True, (255, 255, 0))
+    medium_text = font.render("Medium (2)", True, (255, 255, 0))
     medium_rect = medium_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 30))
     screen.blit(medium_text, medium_rect)
 
-    hard_text = font.render("DIFICIL (3)", True, (255, 0, 0))
+    hard_text = font.render("Hard (3)", True, (255, 0, 0))
     hard_rect = hard_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 90))
     screen.blit(hard_text, hard_rect)
 
@@ -635,14 +621,11 @@ def display_level_selection_menu(screen):
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
-                    select_level(1)
-                    return
+                    return "baby"
                 elif event.key == pygame.K_2:
-                    select_level(2)
-                    return
+                    return "medium"
                 elif event.key == pygame.K_3:
-                    select_level(3)
-                    return
+                    return "hard"
         pygame.time.wait(50)
 
 def main():
@@ -663,8 +646,10 @@ def main():
     while True:
         snake, direction_manager, blocks, score, game_started = initialize_game()
         game_start_time = None  # Reset game start time on restart
-        display_level_selection_menu(display)
-        score = game_loop(display, clock, snake, direction_manager, blocks, score, game_started)
+        # Display level selection menu and set game configuration
+        selected_level = display_level_selection_menu(display)
+        set_game_config(selected_level)
+        score = game_loop(display, clock, snake, direction_manager, blocks, score, game_started, selected_level)
         if not show_game_over(display, score):
             break
 
