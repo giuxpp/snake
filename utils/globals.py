@@ -16,6 +16,16 @@ SNAKE_HEAD_TEXTURE = None
 SNAKE_TAIL_TEXTURE = None
 DIRT_TEXTURE = None  # Background texture
 
+# Global variables for key direction
+UP = (0, -1)           # A direction vector indicating upward movement.
+DOWN = (0, 1)          # A direction vector indicating downward movement.
+LEFT = (-1, 0)         # A direction vector indicating leftward movement.
+RIGHT = (1, 0)         # A direction vector indicating rightward movement.
+
+# Color Definitions
+RED = (255, 0, 0)      # RGB color value for red color.
+BLACK = (0, 0, 0)      # RGB color value for black color.
+CYAN = (0, 255, 255)   # RGB color value for cyan color.
 
 # Global variable to determine the tick interval for closed eyes
 close_eyes_ticks = 21

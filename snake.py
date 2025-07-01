@@ -1,12 +1,15 @@
 import pygame
 import random
 import sys
-from utils import lerp, get_segment_position, get_tail_direction, get_direction_angle, handle_input, set_game_start_time, get_current_time
-from textures import create_gradient_dot_texture, create_serpent_short_thong_head_texture, create_serpent_long_thong_head_texture, create_snake_tail_texture, create_dirt_texture, create_serpent_head_texture_closed_eyes, create_hen_texture
-from blocks import Block, HenBlock
-from matrix import generate_block_position, get_random_empty_cell
-from globals import get_tick_counter, close_eyes_ticks, tongue_long_ticks, IncreaseCounter, COUNTER, game_over, SNAKE_PUNCH, BORDER_GAME_OVER
-from config import WIDTH, HEIGHT, SIDE, STEP, FPS, SNAKE_SPEED, MOVE_DELAY, N_BLOCKS, RED, BLACK, CYAN, BLOCKS_COLOR, SNAKE_COLOR, SNAKE_HEAD_COLOR, SNAKE_TAIL_COLOR, UP, DOWN, LEFT, RIGHT
+from utils.utils import *
+from utils.textures import *
+from utils.blocks import Block, HenBlock
+from utils.matrix import generate_block_position, get_random_empty_cell
+from utils.globals import *
+from config import *
+
+# The distance in pixels that all blocks move on every step. Equal to SIDE.
+STEP = SIDE
 
 def init_textures():
     """Initialize all textures with gradient-dot pattern and special head texture

@@ -2,6 +2,10 @@ import random
 import pygame  # Import pygame for key constants
 import time
 
+# Global variable to track the game start time
+game_start_time = None
+
+
 # Utility functions
 
 def lerp(start, end, t):
@@ -166,8 +170,6 @@ def handle_input(key, current_direction):
     elif key == pygame.K_RIGHT and current_direction != (-1, 0):  # LEFT
         new_direction = (1, 0)  # RIGHT
     return new_direction
-
-game_start_time = None
 
 def set_game_start_time(start_time):
     """Set the game start time

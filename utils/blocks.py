@@ -1,5 +1,5 @@
 import pygame
-from textures import create_gradient_dot_texture, create_hen_texture
+from utils.textures import create_gradient_dot_texture, create_hen_texture
 from config import SIDE
 
 # === Classes ===
