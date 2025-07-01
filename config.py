@@ -3,11 +3,6 @@ import utils.globals
 # Configuration Parameters
 
 # General Game Configurations (used for different levels)
-N_BLOCKS = 6                     # The number of blocks in the game.
-TOTAL_SCORE_TO_WIN = 100         # The total score required to win the game.
-BORDER_GAME_OVER = False         # Global variable to control border collision game over
-SELF_COLLISION_GAME_OVER = False # Global variable to control self-collision game over
-
 game_config = {
     # Default level set to 'baby'
     "level": "baby",
@@ -43,21 +38,18 @@ levels_config = {
         "total_score_to_win": 50,
         "border_game_over": False,
         "self_collision_game_over": False,
-        "food_texture": "apple"
     },
     "medium": {
         "n_blocks": 8,
-        "total_score_to_win": 100,
-        "border_game_over": True,
+        "total_score_to_win": 75,
+        "border_game_over": False,
         "self_collision_game_over": True,
-        "food_texture": "hen"
     },
     "hard": {
         "n_blocks": 10,
-        "total_score_to_win": 150,
+        "total_score_to_win": 100,
         "border_game_over": True,
         "self_collision_game_over": True,
-        "food_texture": "rabbit"
     }
 }
 
@@ -65,8 +57,6 @@ def set_game_config(level):
     """
     Set the game configuration parameters based on the selected level.
     """
-    global N_BLOCKS, TOTAL_SCORE_TO_WIN, BORDER_GAME_OVER, SELF_COLLISION_GAME_OVER
-
     if level not in levels_config:
         raise ValueError(f"Invalid level: {level}. Choose from 'baby', 'medium', 'hard'.")
 
@@ -79,4 +69,3 @@ def set_game_config(level):
     game_config["total_score_to_win"] = config["total_score_to_win"]
     game_config["border_game_over"] = config["border_game_over"]
     game_config["self_collision_game_over"] = config["self_collision_game_over"]
-    game_config["food_texture"] = config["food_texture"]

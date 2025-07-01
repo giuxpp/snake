@@ -3,7 +3,7 @@ import random
 import sys
 from utils.utils import *
 from utils.textures import *
-from utils.blocks import Block, HenBlock
+from utils.blocks import Block, HenBlock, AppleBlock, RabbitBlock
 from utils.matrix import generate_block_position, get_random_empty_cell
 from utils.globals import *
 from config import *
@@ -193,7 +193,8 @@ def draw_score_time_and_level_label(screen, score, level):
     font = pygame.font.SysFont(None, 40)
 
     # Draw score label
-    score_text = font.render(f"Puntos: {score}/{TOTAL_SCORE_TO_WIN}", True, (255, 255, 0))
+    total_score_to_win  = game_config["total_score_to_win"]
+    score_text = font.render(f"Puntos: {score}/{total_score_to_win}", True, (255, 255, 0))
     score_rect = score_text.get_rect(topright=(WIDTH - 10, 10))
     screen.blit(score_text, score_rect)
 
@@ -293,11 +294,11 @@ def generate_initial_blocks():
     blocks placed at random positions on the grid, ensuring that they do not overlap with
     the initial snake position.
     Returns:
-        list: A list of generated HenBlock objects.
+        list: A list of generated Food objects.
     """
     blocks = []
     forbidden = {(WIDTH // 4, HEIGHT // 2)}  # Initial snake position
-    for _ in range(N_BLOCKS):
+    for _ in range(game_config["n_food_blocks"]):
         pos = generate_block_position(forbidden)
         if pos:
             blocks.append(HenBlock(pos))
@@ -324,8 +325,7 @@ def update_blocks(blocks, snake, score):
         if block.pos[0] == snake_head[0] and block.pos[1] == snake_head[1]:
             if not block.hit:
                 block.hit = True
-                score_increase = block.handle_collision(snake)
-                score += score_increase
+                score += 1
                 blocks.remove(block)
 
                 # Keep the tail position for growing
@@ -590,7 +590,7 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
         render_game(display, blocks, snake, score, direction_manager, level)
         clock.tick(FPS)
 
-        if score >= TOTAL_SCORE_TO_WIN:
+        if score >= game_config["total_score_to_win"]:
             GAME_RUNNING = False
             if not show_game_win(display, score):
                 break

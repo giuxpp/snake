@@ -1,6 +1,7 @@
 import pygame
 from utils.textures import create_gradient_dot_texture, create_hen_texture, create_apple_texture, create_rabbit_texture
 from config import SIDE
+from config import game_config
 
 # === Classes ===
 class Block:
@@ -59,40 +60,41 @@ class Block:
         x, y = self.pos
         display.blit(self.texture, (x, y))
 
-    def handle_collision(self):
-        """
-        Handle collision with the snake.
-        Returns:
-            int: Score increase from the collision.
-        """
-        return 0
-
 class HenBlock(Block):
     def __init__(self, pos):
-        """
-        Initialize a HenBlock with position.
-        Args:
-            pos (tuple): Position of the block (x, y).
-        Returns:
-            None
-        """
         super().__init__(pos, (220, 220, 60))  # Default block color
 
     def update_texture(self):
         """
         Override update_texture in HenBlock to use create_hen_texture.
-        Returns:
-            None
+        """
+        if not self.texture:
+            level = game_config.get("level", 1)
+            if level == "medium":
+                self.texture = create_hen_texture(SIDE)
+            elif level == "hard":
+                self.texture = create_rabbit_texture(SIDE)
+            else:
+                self.texture = create_apple_texture(SIDE)
+
+class AppleBlock(Block):
+    def __init__(self, pos):
+        super().__init__(pos, (220, 60, 60))  # Default block color
+
+    def update_texture(self):
+        """
+        Override update_texture in AppleBlock to use create_apple_texture.
+        """
+        if not self.texture:
+            self.texture = create_apple_texture(SIDE)
+
+class RabbitBlock(Block):
+    def __init__(self, pos):
+        super().__init__(pos, (60, 220, 60))  # Default block color
+
+    def update_texture(self):
+        """
+        Override update_texture in RabbitBlock to use create_rabbit_texture.
         """
         if not self.texture:
             self.texture = create_rabbit_texture(SIDE)
-
-    def handle_collision(self, snake=None):
-        """
-        Handle collision with the snake.
-        Args:
-            snake (object, optional): The snake object. Defaults to None.
-        Returns:
-            int: Score increase from the collision.
-        """
-        return 1

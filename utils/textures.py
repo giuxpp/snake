@@ -20,12 +20,10 @@ RABBIT_TEXTURE = None
 def create_gradient_dot_texture(color, size=30, dot_size=4):
     """
     Create a gradient texture with dots overlay.
-
     Args:
         color (tuple): Base color for the gradient (R, G, B).
         size (int): Size of the texture (width and height).
         dot_size (int): Size of the dots overlay.
-
     Returns:
         pygame.Surface: Generated texture with gradient and dots.
     """
@@ -63,11 +61,9 @@ def create_gradient_dot_texture(color, size=30, dot_size=4):
 def create_serpent_long_thong_head_texture(color, size=30):
     """
     Create a special serpent head texture with scales, eyes, and a long tongue.
-
     Args:
         color (tuple): Base color for the head (R, G, B).
         size (int): Size of the texture (width and height).
-
     Returns:
         pygame.Surface: Generated texture for the serpent head.
     """
@@ -123,11 +119,9 @@ def create_serpent_long_thong_head_texture(color, size=30):
 def create_serpent_short_thong_head_texture(color, size=30):
     """
     Create a special serpent head texture with scales, eyes, and a short tongue.
-
     Args:
         color (tuple): Base color for the head (R, G, B).
         size (int): Size of the texture (width and height).
-
     Returns:
         pygame.Surface: Generated texture for the serpent head.
     """
@@ -184,11 +178,9 @@ def create_serpent_short_thong_head_texture(color, size=30):
 def create_serpent_head_texture_closed_eyes(color, size=30):
     """
     Create a special serpent head texture with scales and closed eyes.
-
     Args:
         color (tuple): Base color for the head (R, G, B).
         size (int): Size of the texture (width and height).
-
     Returns:
         pygame.Surface: Generated texture for the serpent head with closed eyes.
     """
@@ -242,11 +234,9 @@ def create_serpent_head_texture_closed_eyes(color, size=30):
 def create_snake_tail_texture(color, size=30):
     """
     Create a special snake tail texture with a tapered, forked end.
-
     Args:
         color (tuple): Base color for the tail (R, G, B).
         size (int): Size of the texture (width and height).
-
     Returns:
         pygame.Surface: Generated texture for the snake tail.
     """
@@ -305,10 +295,8 @@ def create_snake_tail_texture(color, size=30):
 def create_dirt_texture_level_1(size=30):
     """
     Create a grainy blue dirt texture for the background.
-
     Args:
         size (int): Size of the texture (width and height).
-
     Returns:
         pygame.Surface: Generated texture for the dirt background.
     """
@@ -343,10 +331,8 @@ def create_dirt_texture_level_1(size=30):
 def create_dirt_texture_level_2(size=30):
     """
     Create a grainy brown dirt texture for the background.
-
     Args:
         size (int): Size of the texture (width and height).
-
     Returns:
         pygame.Surface: Generated texture for the dirt background.
     """
@@ -381,10 +367,8 @@ def create_dirt_texture_level_2(size=30):
 def create_dirt_texture_level_3(size=30):
     """
     Create a grainy red dirt texture for the background.
-
     Args:
         size (int): Size of the texture (width and height).
-
     Returns:
         pygame.Surface: Generated texture for the dirt background.
     """
@@ -420,10 +404,8 @@ def create_dirt_texture_level_3(size=30):
 def create_hen_texture(size=30):
     """
     Create a texture resembling a hen with a circular figure, eyes, and a bigger beak.
-
     Args:
         size (int): Size of the texture (width and height).
-
     Returns:
         pygame.Surface: Generated texture for the hen block.
     """
@@ -464,10 +446,8 @@ def create_hen_texture(size=30):
 def create_apple_texture(size=30):
     """
     Create a texture resembling an apple with a circular figure, a stem, and a leaf.
-
     Args:
         size (int): Size of the texture (width and height).
-
     Returns:
         pygame.Surface: Generated texture for the apple block.
     """
@@ -498,10 +478,8 @@ def create_apple_texture(size=30):
 def create_rabbit_texture(size=30):
     """
     Create a texture resembling a rabbit with a head, eyes, nose, and two big ears.
-
     Args:
         size (int): Size of the texture (width and height).
-
     Returns:
         pygame.Surface: Generated texture for the rabbit block.
     """
