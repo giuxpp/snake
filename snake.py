@@ -3,7 +3,7 @@ import random
 import sys
 from utils.utils import *
 from utils.textures import *
-from utils.blocks import Block, HenBlock, AppleBlock, RabbitBlock
+from utils.blocks import HenBlock
 from utils.matrix import generate_block_position, get_random_empty_cell
 from utils.globals import *
 from config import *
@@ -592,8 +592,9 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
 
         if score >= game_config["total_score_to_win"]:
             GAME_RUNNING = False
-            if not show_game_win(display, score):
-                break
+            GAME_WIN = True
+            game_over = True
+            break
 
     return score
 
@@ -667,6 +668,8 @@ def main():
         selected_level = display_level_selection_menu(display)
         set_game_config(selected_level)
         score = game_loop(display, clock, snake, direction_manager, blocks, score, game_started, selected_level)
+        if GAME_WIN and not show_game_win(display, score):
+            break
         if not show_game_over(display, score):
             break
 

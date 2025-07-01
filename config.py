@@ -1,4 +1,5 @@
 import utils.globals
+import sys
 
 # Configuration Parameters
 
@@ -14,8 +15,8 @@ game_config = {
 }
 
 # Display Configuration and Resolution Parameters
-WIDTH = 1000             # The width of the game window in pixels.
-HEIGHT = 750             # The height of the game window in pixels.
+WIDTH = 800             # The width of the game window in pixels.
+HEIGHT = 600             # The height of the game window in pixels.
 SIDE = 30                # Size of each grid cell in the game.
 FPS = 60                 # Frames per second. Increased for smoother animation.
 SNAKE_SPEED = 5          # The speed at which the snake moves, measured in blocks per second.
@@ -35,15 +36,15 @@ SNAKE_TAIL_COLOR = (min(250, int(SNAKE_COLOR[0] * 1.8)),
 levels_config = {
     "baby": {
         "n_blocks": 6,
-        "total_score_to_win": 50,
+        "total_score_to_win": 10,
         "border_game_over": False,
         "self_collision_game_over": False,
     },
     "medium": {
         "n_blocks": 8,
         "total_score_to_win": 75,
-        "border_game_over": False,
-        "self_collision_game_over": True,
+        "border_game_over": True,
+        "self_collision_game_over": False,
     },
     "hard": {
         "n_blocks": 10,
@@ -69,3 +70,37 @@ def set_game_config(level):
     game_config["total_score_to_win"] = config["total_score_to_win"]
     game_config["border_game_over"] = config["border_game_over"]
     game_config["self_collision_game_over"] = config["self_collision_game_over"]
+
+# Added logic to reset game data and restart from level selection menu after WIN
+def reset_game_data():
+    """
+    Reset all game data and return to level selection menu.
+    """
+    utils.globals.GAME_RUNNING = False
+    utils.globals.select_level = True
+    utils.globals.clear_display()
+    set_game_config("baby")  # Default level reset
+
+# Updated WIN state logic to handle ENTER key press
+def handle_win_state(screen):
+    """
+    Handle the WIN state logic.
+    """
+    from snake import display_level_selection_menu  # Moved import inside function to avoid circular dependency
+
+    if utils.globals.GAME_RUNNING:
+        return
+
+    if utils.globals.select_level:
+        display_level_selection_menu(screen)
+        return
+
+    # Logic for ENTER key press
+    if utils.globals.enter_key_pressed:
+        reset_game_data()
+        display_level_selection_menu(screen)
+
+    # Logic for ESC key press
+    if utils.globals.esc_key_pressed:
+        utils.globals.GAME_RUNNING = False
+        sys.exit()
