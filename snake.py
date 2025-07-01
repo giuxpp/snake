@@ -19,15 +19,17 @@ def init_textures():
     Returns:
         None
     """
-    global BLOCK_TEXTURE, SNAKE_TEXTURE, SNAKE_HEAD_TEXTURE, SNAKE_TAIL_TEXTURE, DIRT_TEXTURE
+    global BLOCK_TEXTURE, SNAKE_TEXTURE, SNAKE_HEAD_TEXTURE, SNAKE_TAIL_TEXTURE, BG_TEXTURE_LEVEL_1,  BG_TEXTURE_LEVEL_2,  BG_TEXTURE_LEVEL_3
 
     BLOCK_TEXTURE = create_hen_texture(SIDE)  # Hen texture for regular blocks
     SNAKE_TEXTURE = create_gradient_dot_texture(SNAKE_COLOR)
     SNAKE_HEAD_TEXTURE = create_serpent_short_thong_head_texture(SNAKE_HEAD_COLOR)  # Start with open eyes
     SNAKE_TAIL_TEXTURE = create_snake_tail_texture(SNAKE_TAIL_COLOR)
-    DIRT_TEXTURE = create_dirt_texture(SIDE)  # Dirt texture for background
+    BG_TEXTURE_LEVEL_1 = create_dirt_texture_level_1(SIDE)  # Dirt texture for background
+    BG_TEXTURE_LEVEL_2 = create_dirt_texture_level_2(SIDE)  # Dirt texture for background
+    BG_TEXTURE_LEVEL_3 = create_dirt_texture_level_3(SIDE)  # Dirt texture for background
 
-def update_head_textures():
+def update_head_snake_textures():
     """Update the head texture based on the current tick counter
     This function updates the snake head texture based on whether the snake's eyes are closed
     or open. It changes the texture to reflect the current state of the snake's head.
@@ -339,7 +341,7 @@ def update_blocks(blocks, snake, score):
 
     return score
 
-def draw_blocks(blocks, display):
+def draw_food_blocks(blocks, display):
     """Draw all blocks on the display
     This function draws all the blocks in the game on the display. It iterates through the
     list of blocks and draws each block using its associated texture.
@@ -382,7 +384,7 @@ def draw_snake(display, snake, direction_manager):
         else:  # Body
             draw_block(display, pos, SNAKE_COLOR)
 
-def draw_background(display):
+def draw_background(display, texture):
     """Draw the background texture to fill the screen
     This function fills the entire screen with the dirt texture, creating the background
     for the game. It tiles the texture across the screen dimensions.
@@ -393,7 +395,7 @@ def draw_background(display):
     """
     for x in range(0, WIDTH, SIDE):
         for y in range(0, HEIGHT, SIDE):
-            display.blit(DIRT_TEXTURE, (x, y))
+            display.blit(texture, (x, y))
 
 # Refactored main function to reduce cognitive complexity
 # Extracted game initialization and game loop logic into separate functions
@@ -467,9 +469,21 @@ def render_game(display, blocks, snake, score, direction_manager, level):
     """
     global GAME_RUNNING
     display.fill((0, 0, 0))
-    draw_background(display)
-    draw_blocks(blocks, display)
+
+    # Draw the background based on the selected level
+    if game_config["level"] == "baby":
+        draw_background(display, BG_TEXTURE_LEVEL_1)
+    elif game_config["level"] == "medium":
+        draw_background(display, BG_TEXTURE_LEVEL_2)
+    elif game_config["level"] == "hard":
+        draw_background(display, BG_TEXTURE_LEVEL_3)
+    else:
+        draw_background(display, BG_TEXTURE_LEVEL_1)
+
+    # Draw blocks and snake
+    draw_food_blocks(blocks, display)
     draw_snake(display, snake, direction_manager)
+
     if GAME_RUNNING:
         draw_score_time_and_level_label(display, score, level)
     pygame.display.flip()
@@ -558,7 +572,7 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
         if not pygame.key.get_pressed():
             SNAKE_PUNCH = 1
 
-        update_head_textures()
+        update_head_snake_textures()
 
         if not game_started:
             render_game(display, blocks, snake, score, direction_manager, level)

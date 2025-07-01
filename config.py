@@ -9,6 +9,7 @@ BORDER_GAME_OVER = False         # Global variable to control border collision g
 SELF_COLLISION_GAME_OVER = False # Global variable to control self-collision game over
 
 game_config = {
+    "level": "baby",  # Default level set to 'baby'
     "n_food_blocks": 6,
     "total_score_to_win": 100,
     "border_game_over": False,
@@ -68,6 +69,7 @@ def set_game_config(level):
     elif level == "medium": config = levels_config["medium"]
     elif level == "hard":   config = levels_config["hard"]
 
+    game_config["level"] = level
     game_config["n_food_blocks"] = config["n_blocks"]
     game_config["total_score_to_win"] = config["total_score_to_win"]
     game_config["border_game_over"] = config["border_game_over"]

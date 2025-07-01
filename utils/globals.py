@@ -16,13 +16,6 @@ GAME_RUNNING = False
 # Constants for snake movement: 1=Regular Movement  2=Snake Punch (faster)
 SNAKE_PUNCH = 1
 
-# Create textures at module level
-BLOCK_TEXTURE = None
-SNAKE_TEXTURE = None
-SNAKE_HEAD_TEXTURE = None
-SNAKE_TAIL_TEXTURE = None
-DIRT_TEXTURE = None  # Background texture
-
 # Global variables for key direction
 UP = (0, -1)           # A direction vector indicating upward movement.
 DOWN = (0, 1)          # A direction vector indicating downward movement.

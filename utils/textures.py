@@ -1,6 +1,15 @@
 import pygame
 import random
 
+# Global textures
+BLOCK_TEXTURE = None
+SNAKE_TEXTURE = None
+SNAKE_HEAD_TEXTURE = None
+SNAKE_TAIL_TEXTURE = None
+BG_TEXTURE_LEVEL_1 = None  # Background texture
+BG_TEXTURE_LEVEL_2 = None  # Background texture
+BG_TEXTURE_LEVEL_3 = None  # Background texture
+
 # === Texture Generation Functions ===
 def create_gradient_dot_texture(color, size=30, dot_size=4):
     """
@@ -287,7 +296,45 @@ def create_snake_tail_texture(color, size=30):
 
     return texture
 
-def create_dirt_texture(size=30):
+def create_dirt_texture_level_1(size=30):
+    """
+    Create a grainy blue dirt texture for the background.
+
+    Args:
+        size (int): Size of the texture (width and height).
+
+    Returns:
+        pygame.Surface: Generated texture for the dirt background.
+    """
+    # Base blue color
+    base_color = (70, 130, 180)  # Steel blue
+    texture = pygame.Surface((size, size), pygame.SRCALPHA)
+
+    # Create variations of blue for the grainy effect
+    darker = (
+        max(0, base_color[0] - 30),
+        max(0, base_color[1] - 30),
+        max(0, base_color[2] - 30)
+    )
+    lighter = (
+        min(255, base_color[0] + 30),
+        min(255, base_color[1] + 30),
+        min(255, base_color[2] + 30)
+    )
+
+    # Fill with base color
+    texture.fill(base_color)
+
+    # Add random noise for grainy effect
+    for y in range(size):
+        for x in range(size):
+            if random.random() < 0.3:  # 30% chance for a grain
+                color = random.choice([darker, lighter])
+                texture.set_at((x, y), color)
+
+    return texture
+
+def create_dirt_texture_level_2(size=30):
     """
     Create a grainy brown dirt texture for the background.
 
@@ -302,6 +349,44 @@ def create_dirt_texture(size=30):
     texture = pygame.Surface((size, size), pygame.SRCALPHA)
 
     # Create variations of brown for the grainy effect
+    darker = (
+        max(0, base_color[0] - 30),
+        max(0, base_color[1] - 30),
+        max(0, base_color[2] - 30)
+    )
+    lighter = (
+        min(255, base_color[0] + 30),
+        min(255, base_color[1] + 30),
+        min(255, base_color[2] + 30)
+    )
+
+    # Fill with base color
+    texture.fill(base_color)
+
+    # Add random noise for grainy effect
+    for y in range(size):
+        for x in range(size):
+            if random.random() < 0.3:  # 30% chance for a grain
+                color = random.choice([darker, lighter])
+                texture.set_at((x, y), color)
+
+    return texture
+
+def create_dirt_texture_level_3(size=30):
+    """
+    Create a grainy red dirt texture for the background.
+
+    Args:
+        size (int): Size of the texture (width and height).
+
+    Returns:
+        pygame.Surface: Generated texture for the dirt background.
+    """
+    # Base red color
+    base_color = (178, 34, 34)  # Firebrick red
+    texture = pygame.Surface((size, size), pygame.SRCALPHA)
+
+    # Create variations of red for the grainy effect
     darker = (
         max(0, base_color[0] - 30),
         max(0, base_color[1] - 30),
