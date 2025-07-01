@@ -103,7 +103,7 @@ def show_game_over(screen, score):
 
     # Display the final score
     font2 = pygame.font.SysFont(None, 60)
-    score_text = font2.render(f"Puntos: {score}", True, (255, 255, 255))  # White color for score
+    score_text = font2.render(f"Puntos: {score}/{TOTAL_SCORE_TO_WIN}", True, (255, 255, 255))  # White color for score
     score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
     screen.blit(score_text, score_rect)
 
@@ -111,6 +111,49 @@ def show_game_over(screen, score):
     elapsed_time = get_current_time()
     minutes = elapsed_time // 60
     seconds = elapsed_time % 60
+    time_text = font2.render(f"TIEMPO: {format_time(elapsed_time)}", True, (255, 255, 255))  # White color for time
+    time_rect = time_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+    screen.blit(time_text, time_rect)
+    set_game_start_time(int(time.time()))
+
+    # Update the display
+    pygame.display.flip()
+
+    # Wait for user to close the window or press ENTER to restart
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                pygame.quit()
+                sys.exit()
+            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN):
+                return True
+        pygame.time.wait(50)
+
+def show_game_win(screen, score):
+    """Display the game win screen with the final score and elapsed time
+    This function shows the game win screen when the player achieves the target score.
+    It displays the "YOU WIN" message, the final score, and the elapsed time.
+    Args:
+        screen (Surface): The Pygame surface to draw the game win screen on.
+        score (int): The final score to display.
+    Returns:
+        bool: True if the player wants to restart the game, False otherwise.
+    """
+    global game_start_time
+
+    font = pygame.font.SysFont(None, 100)
+    text = font.render("¡¡ GANASTE !!", True, (0, 255, 0))  # Green color for win message
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
+    screen.blit(text, text_rect)
+
+    # Display the final score
+    font2 = pygame.font.SysFont(None, 60)
+    score_text = font2.render(f"Puntos: {score}/{TOTAL_SCORE_TO_WIN}", True, (255, 255, 255))  # White color for score
+    score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
+    screen.blit(score_text, score_rect)
+
+    # Display the elapsed time
+    elapsed_time = get_current_time()
     time_text = font2.render(f"TIEMPO: {format_time(elapsed_time)}", True, (255, 255, 255))  # White color for time
     time_rect = time_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
     screen.blit(time_text, time_rect)
@@ -142,7 +185,7 @@ def draw_score_and_time_label(screen, score):
     font = pygame.font.SysFont(None, 40)
 
     # Draw score label
-    score_text = font.render(f"Puntos: {score}", True, (255, 255, 0))
+    score_text = font.render(f"Puntos: {score}/{TOTAL_SCORE_TO_WIN}", True, (255, 255, 0))
     score_rect = score_text.get_rect(topright=(WIDTH - 10, 10))
     screen.blit(score_text, score_rect)
 
@@ -532,6 +575,11 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
 
         render_game(display, blocks, snake, score, direction_manager)
         clock.tick(FPS)
+
+        if score >= TOTAL_SCORE_TO_WIN:
+            GAME_RUNNING = False
+            if not show_game_win(display, score):
+                break
 
     return score
 
