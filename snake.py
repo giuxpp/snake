@@ -94,23 +94,29 @@ def show_game_over(screen, score):
     Returns:
         bool: True if the player wants to restart the game, False otherwise.
     """
+    global game_start_time
+
     font = pygame.font.SysFont(None, 100)
     text = font.render("GAME OVER", True, (255, 255, 255))
     text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
     screen.blit(text, text_rect)
 
+    # Display the final score
     font2 = pygame.font.SysFont(None, 60)
     score_text = font2.render(f"Puntos: {score}", True, (255, 255, 255))  # White color for score
     score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
     screen.blit(score_text, score_rect)
 
+    # Display the elapsed time
     elapsed_time = get_current_time()
     minutes = elapsed_time // 60
     seconds = elapsed_time % 60
     time_text = font2.render(f"TIEMPO: {format_time(elapsed_time)}", True, (255, 255, 255))  # White color for time
     time_rect = time_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
     screen.blit(time_text, time_rect)
+    set_game_start_time(int(time.time()))
 
+    # Update the display
     pygame.display.flip()
 
     # Wait for user to close the window or press ENTER to restart
@@ -383,6 +389,7 @@ def handle_events(game_started, direction_manager):
         tuple: A tuple containing the updated game started flag and game over flag.
     """
     game_over = False
+    global GAME_RUNNING
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -394,11 +401,13 @@ def handle_events(game_started, direction_manager):
                 continue
             if not game_started and is_pressed and event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
                 game_started = True
+                GAME_RUNNING = True  # Set GAME_RUNNING to True when the game starts
                 direction_manager.current_direction = None
+                if game_start_time is None:
+                    set_game_start_time(int(time.time()))
                 try:
                     direction_manager.handle_key_press(event.key, is_pressed)
                 except Exception:
-                    # Handle exception gracefully and allow movement
                     direction_manager.current_direction = LEFT
             direction_manager.handle_key_press(event.key, is_pressed)
     return game_started, game_over
@@ -416,11 +425,13 @@ def render_game(display, blocks, snake, score, direction_manager):
     Returns:
         None
     """
+    global GAME_RUNNING
     display.fill((0, 0, 0))
     draw_background(display)
     draw_blocks(blocks, display)
     draw_snake(display, snake, direction_manager)
-    draw_score_and_time_label(display, score)
+    if GAME_RUNNING:
+        draw_score_and_time_label(display, score)
     pygame.display.flip()
 
 def update_snake(snake, direction_manager, blocks, score):
@@ -470,7 +481,7 @@ def update_snake(snake, direction_manager, blocks, score):
         return True, score
 
     snake.insert(0, new_head)
-    IncreaseCounter()
+    increase_counter()
     old_score = score
     score = update_blocks(blocks, snake, score)
 
@@ -495,13 +506,15 @@ def game_loop(display, clock, snake, direction_manager, blocks, score, game_star
     Returns:
         int: The final score when the game is over.
     """
-    global SNAKE_PUNCH
+    global SNAKE_PUNCH, GAME_RUNNING
     move_counter = 0
     game_over = False
 
     while not game_over:
         game_started, game_over = handle_events(game_started, direction_manager)
 
+        if game_over:
+            GAME_RUNNING = False  # Reset GAME_RUNNING to False when the game is over
         # Ensure SNAKE_PUNCH is reset to 1 if no button is pressed
         if not pygame.key.get_pressed():
             SNAKE_PUNCH = 1
@@ -542,6 +555,7 @@ def main():
     Returns:
         None
     """
+    global game_start_time
     pygame.init()
     display = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
     pygame.display.set_caption("Snake Game")
@@ -550,10 +564,11 @@ def main():
 
     while True:
         snake, direction_manager, blocks, score, game_started = initialize_game()
-        set_game_start_time(get_current_time())  # Set the game start time
+        game_start_time = None  # Reset game start time on restart
         score = game_loop(display, clock, snake, direction_manager, blocks, score, game_started)
         if not show_game_over(display, score):
             break
+
 
 if __name__ == "__main__":
     main()

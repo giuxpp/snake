@@ -191,4 +191,5 @@ def get_current_time():
     global game_start_time
     if game_start_time is None:
         return 0
-    return int(time.time()) - game_start_time
+    elapsed_time = int(time.time()) - game_start_time
+    return elapsed_time

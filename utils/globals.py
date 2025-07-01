@@ -6,6 +6,9 @@ COUNTER = 1
 # Global variable to track the game state
 game_over = False
 
+# Add a global variable to control the game running state
+GAME_RUNNING = False
+
 # Constants for snake movement: 1=Regular Movement  2=Snake Punch (faster)
 SNAKE_PUNCH = 1
 
@@ -47,7 +50,7 @@ def get_tick_counter(counts):
     """
     return COUNTER % counts == 0
 
-def IncreaseCounter():
+def increase_counter():
     """
     Increment the global COUNTER variable, resetting it to 1 if it exceeds 100.
     Args:
