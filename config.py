@@ -9,11 +9,13 @@ BORDER_GAME_OVER = False         # Global variable to control border collision g
 SELF_COLLISION_GAME_OVER = False # Global variable to control self-collision game over
 
 game_config = {
-    "level": "baby",  # Default level set to 'baby'
+    # Default level set to 'baby'
+    "level": "baby",
     "n_food_blocks": 6,
     "total_score_to_win": 100,
     "border_game_over": False,
-    "self_collision_game_over": False
+    "self_collision_game_over": False,
+    "food_texture": "apple"
 }
 
 # Display Configuration and Resolution Parameters
@@ -40,19 +42,22 @@ levels_config = {
         "n_blocks": 6,
         "total_score_to_win": 50,
         "border_game_over": False,
-        "self_collision_game_over": False
+        "self_collision_game_over": False,
+        "food_texture": "apple"
     },
     "medium": {
         "n_blocks": 8,
         "total_score_to_win": 100,
         "border_game_over": True,
-        "self_collision_game_over": True
+        "self_collision_game_over": True,
+        "food_texture": "hen"
     },
     "hard": {
         "n_blocks": 10,
         "total_score_to_win": 150,
         "border_game_over": True,
-        "self_collision_game_over": True
+        "self_collision_game_over": True,
+        "food_texture": "rabbit"
     }
 }
 
@@ -74,3 +79,4 @@ def set_game_config(level):
     game_config["total_score_to_win"] = config["total_score_to_win"]
     game_config["border_game_over"] = config["border_game_over"]
     game_config["self_collision_game_over"] = config["self_collision_game_over"]
+    game_config["food_texture"] = config["food_texture"]

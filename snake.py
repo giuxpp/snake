@@ -11,6 +11,8 @@ from config import *
 # The distance in pixels that all blocks move on every step. Equal to SIDE.
 STEP = SIDE
 
+FOOD_BLOCKS_TEXTURE = None
+
 def init_textures():
     """Initialize all textures with gradient-dot pattern and special head texture
     This function initializes the textures used in the game, including the block texture,
@@ -19,9 +21,11 @@ def init_textures():
     Returns:
         None
     """
-    global BLOCK_TEXTURE, SNAKE_TEXTURE, SNAKE_HEAD_TEXTURE, SNAKE_TAIL_TEXTURE, BG_TEXTURE_LEVEL_1,  BG_TEXTURE_LEVEL_2,  BG_TEXTURE_LEVEL_3
+    global HEN_TEXTURE, APPLE_TEXTURE, RABBIT_TEXTURE, SNAKE_TEXTURE, SNAKE_HEAD_TEXTURE, SNAKE_TAIL_TEXTURE, BG_TEXTURE_LEVEL_1,  BG_TEXTURE_LEVEL_2,  BG_TEXTURE_LEVEL_3
 
-    BLOCK_TEXTURE = create_hen_texture(SIDE)  # Hen texture for regular blocks
+    HEN_TEXTURE = create_hen_texture(SIDE)  # Hen texture for regular blocks
+    APPLE_TEXTURE = create_apple_texture(SIDE)  # Apple texture for food blocks
+    RABBIT_TEXTURE = create_rabbit_texture(SIDE)  # Rabbit texture for food blocks
     SNAKE_TEXTURE = create_gradient_dot_texture(SNAKE_COLOR)
     SNAKE_HEAD_TEXTURE = create_serpent_short_thong_head_texture(SNAKE_HEAD_COLOR)  # Start with open eyes
     SNAKE_TAIL_TEXTURE = create_snake_tail_texture(SNAKE_TAIL_COLOR)
@@ -46,7 +50,6 @@ def update_head_snake_textures():
 
 def draw_block(display, pos, color, texture=None, rotation=0):
     """Draw a textured block with optional rotation
-
     This function draws a block on the display at the specified position with the given color.
     It can use a texture for the block and rotate the block if needed.
     Args:
@@ -63,7 +66,7 @@ def draw_block(display, pos, color, texture=None, rotation=0):
     # If no texture provided, use default textures
     if texture is None:
         if color == BLOCKS_COLOR:
-            texture = BLOCK_TEXTURE
+            texture = APPLE_TEXTURE
         elif color == SNAKE_HEAD_COLOR:
             texture = SNAKE_HEAD_TEXTURE
         elif color == SNAKE_TAIL_COLOR:

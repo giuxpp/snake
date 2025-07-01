@@ -1,5 +1,5 @@
 import pygame
-from utils.textures import create_gradient_dot_texture, create_hen_texture
+from utils.textures import create_gradient_dot_texture, create_hen_texture, create_apple_texture, create_rabbit_texture
 from config import SIDE
 
 # === Classes ===
@@ -85,7 +85,7 @@ class HenBlock(Block):
             None
         """
         if not self.texture:
-            self.texture = create_hen_texture(SIDE)
+            self.texture = create_rabbit_texture(SIDE)
 
     def handle_collision(self, snake=None):
         """

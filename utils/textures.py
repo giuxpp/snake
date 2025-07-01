@@ -1,14 +1,20 @@
 import pygame
 import random
 
-# Global textures
-BLOCK_TEXTURE = None
+# Global textures (used outside this file)
+FOOD_BLOCK_TEXTURE = None
 SNAKE_TEXTURE = None
 SNAKE_HEAD_TEXTURE = None
 SNAKE_TAIL_TEXTURE = None
 BG_TEXTURE_LEVEL_1 = None  # Background texture
 BG_TEXTURE_LEVEL_2 = None  # Background texture
 BG_TEXTURE_LEVEL_3 = None  # Background texture
+
+# Local Textures
+HEN_TEXTURE = None
+APPLE_TEXTURE = None
+RABBIT_TEXTURE = None
+RABBIT_TEXTURE = None
 
 # === Texture Generation Functions ===
 def create_gradient_dot_texture(color, size=30, dot_size=4):
@@ -452,5 +458,87 @@ def create_hen_texture(size=30):
     # Add eye pupils (black)
     pygame.draw.circle(texture, (0, 0, 0), eye_pos_left, eye_size // 3)
     pygame.draw.circle(texture, (0, 0, 0), eye_pos_right, eye_size // 3)
+
+    return texture
+
+def create_apple_texture(size=30):
+    """
+    Create a texture resembling an apple with a circular figure, a stem, and a leaf.
+
+    Args:
+        size (int): Size of the texture (width and height).
+
+    Returns:
+        pygame.Surface: Generated texture for the apple block.
+    """
+    texture = pygame.Surface((size, size), pygame.SRCALPHA)
+
+    # Draw apple body (circle)
+    body_color = (255, 0, 0)  # Bright red for apple body
+    pygame.draw.circle(texture, body_color, (size // 2, size // 2), size // 2)
+
+    # Draw stem (rectangle at the top)
+    stem_color = (139, 69, 19)  # Brown for stem
+    stem_width = size // 10
+    stem_height = size // 4
+    stem_rect = pygame.Rect((size // 2 - stem_width // 2, size // 6 - stem_height // 2), (stem_width, stem_height))
+    pygame.draw.rect(texture, stem_color, stem_rect)
+
+    # Draw leaf (triangle next to the stem)
+    leaf_color = (34, 139, 34)  # Green for leaf
+    leaf_points = [
+        (size // 2 + stem_width, size // 6 - stem_height // 2),  # Top right
+        (size // 2 + stem_width * 2, size // 6),                # Middle right
+        (size // 2 + stem_width, size // 6 + stem_height // 2)  # Bottom right
+    ]
+    pygame.draw.polygon(texture, leaf_color, leaf_points)
+
+    return texture
+
+def create_rabbit_texture(size=30):
+    """
+    Create a texture resembling a rabbit with a head, eyes, nose, and two big ears.
+
+    Args:
+        size (int): Size of the texture (width and height).
+
+    Returns:
+        pygame.Surface: Generated texture for the rabbit block.
+    """
+    texture = pygame.Surface((size, size), pygame.SRCALPHA)
+
+    # Draw rabbit head (circle)
+    head_color = (200, 200, 200)  # Light gray for rabbit head
+    pygame.draw.circle(texture, head_color, (size // 2, size // 2), size // 3)
+
+    # Draw ears (two elongated ovals above the head)
+    ear_color = head_color
+    ear_width = size // 5
+    ear_height = size // 2
+
+    left_ear_rect = pygame.Rect((size // 2 - ear_width - ear_width // 2, size // 6 - ear_height // 2), (ear_width, ear_height))
+    right_ear_rect = pygame.Rect((size // 2 + ear_width // 2, size // 6 - ear_height // 2), (ear_width, ear_height))
+
+    pygame.draw.ellipse(texture, ear_color, left_ear_rect)
+    pygame.draw.ellipse(texture, ear_color, right_ear_rect)
+
+    # Draw eyes (two small circles on the head)
+    eye_color = (0, 0, 0)  # Black for eyes
+    eye_size = size // 12
+
+    eye_pos_left = (size // 2 - size // 10, size // 2 - size // 8)
+    eye_pos_right = (size // 2 + size // 10, size // 2 - size // 8)
+
+    pygame.draw.circle(texture, eye_color, eye_pos_left, eye_size)
+    pygame.draw.circle(texture, eye_color, eye_pos_right, eye_size)
+
+    # Draw nose (small triangle at the center of the head)
+    nose_color = (255, 105, 180)  # Pink for nose
+    nose_points = [
+        (size // 2, size // 2),  # Top center
+        (size // 2 - size // 20, size // 2 + size // 12),  # Bottom left
+        (size // 2 + size // 20, size // 2 + size // 12)   # Bottom right
+    ]
+    pygame.draw.polygon(texture, nose_color, nose_points)
 
     return texture
